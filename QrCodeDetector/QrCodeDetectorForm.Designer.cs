@@ -1,0 +1,161 @@
+﻿namespace QrCodeDetector
+{
+    partial class QrCodeDetectorForm
+    {
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose( bool disposing )
+        {
+            if( disposing && ( components != null ) )
+            {
+                components.Dispose();
+            }
+            base.Dispose( disposing );
+        }
+
+        #region Windows Form Designer generated code
+
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            this.components = new System.ComponentModel.Container();
+            this.uxDataGrid = new System.Windows.Forms.DataGridView();
+            this.filenameDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.uxImageHolderBindingSource = new System.Windows.Forms.BindingSource(this.components);
+            this.uxImageDisplay = new System.Windows.Forms.PictureBox();
+            this.uxMenu = new System.Windows.Forms.MenuStrip();
+            this.uxFileMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.uxSetImageDirectory = new System.Windows.Forms.ToolStripMenuItem();
+            this.uxImageDirectoryBrowser = new System.Windows.Forms.FolderBrowserDialog();
+            this.uxFileSystemWatcher = new System.IO.FileSystemWatcher();
+            ((System.ComponentModel.ISupportInitialize)(this.uxDataGrid)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.uxImageHolderBindingSource)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.uxImageDisplay)).BeginInit();
+            this.uxMenu.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.uxFileSystemWatcher)).BeginInit();
+            this.SuspendLayout();
+            // 
+            // uxDataGrid
+            // 
+            this.uxDataGrid.AllowUserToAddRows = false;
+            this.uxDataGrid.AllowUserToDeleteRows = false;
+            this.uxDataGrid.AllowUserToOrderColumns = true;
+            this.uxDataGrid.AllowUserToResizeRows = false;
+            this.uxDataGrid.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.uxDataGrid.AutoGenerateColumns = false;
+            this.uxDataGrid.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.uxDataGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.uxDataGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.filenameDataGridViewTextBoxColumn});
+            this.uxDataGrid.DataSource = this.uxImageHolderBindingSource;
+            this.uxDataGrid.Location = new System.Drawing.Point(12, 27);
+            this.uxDataGrid.MultiSelect = false;
+            this.uxDataGrid.Name = "uxDataGrid";
+            this.uxDataGrid.ReadOnly = true;
+            this.uxDataGrid.RowHeadersVisible = false;
+            this.uxDataGrid.Size = new System.Drawing.Size(240, 322);
+            this.uxDataGrid.TabIndex = 0;
+            this.uxDataGrid.CellStateChanged += new System.Windows.Forms.DataGridViewCellStateChangedEventHandler(this.uxDataGrid_CellStateChanged);
+            // 
+            // filenameDataGridViewTextBoxColumn
+            // 
+            this.filenameDataGridViewTextBoxColumn.DataPropertyName = "Filename";
+            this.filenameDataGridViewTextBoxColumn.HeaderText = "Filename";
+            this.filenameDataGridViewTextBoxColumn.Name = "filenameDataGridViewTextBoxColumn";
+            this.filenameDataGridViewTextBoxColumn.ReadOnly = true;
+            // 
+            // uxImageHolderBindingSource
+            // 
+            this.uxImageHolderBindingSource.DataSource = typeof(QrCodeDetector.ImageHolder);
+            // 
+            // uxImageDisplay
+            // 
+            this.uxImageDisplay.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.uxImageDisplay.Location = new System.Drawing.Point(258, 27);
+            this.uxImageDisplay.Name = "uxImageDisplay";
+            this.uxImageDisplay.Size = new System.Drawing.Size(314, 322);
+            this.uxImageDisplay.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.uxImageDisplay.TabIndex = 1;
+            this.uxImageDisplay.TabStop = false;
+            // 
+            // uxMenu
+            // 
+            this.uxMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.uxFileMenu});
+            this.uxMenu.Location = new System.Drawing.Point(0, 0);
+            this.uxMenu.Name = "uxMenu";
+            this.uxMenu.Size = new System.Drawing.Size(584, 24);
+            this.uxMenu.TabIndex = 2;
+            this.uxMenu.Text = "menuStrip1";
+            // 
+            // uxFileMenu
+            // 
+            this.uxFileMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.uxSetImageDirectory});
+            this.uxFileMenu.Name = "uxFileMenu";
+            this.uxFileMenu.Size = new System.Drawing.Size(37, 20);
+            this.uxFileMenu.Text = "File";
+            // 
+            // uxSetImageDirectory
+            // 
+            this.uxSetImageDirectory.Name = "uxSetImageDirectory";
+            this.uxSetImageDirectory.Size = new System.Drawing.Size(177, 22);
+            this.uxSetImageDirectory.Text = "Set Image Directory";
+            this.uxSetImageDirectory.Click += new System.EventHandler(this.uxSetImageDirectory_Click);
+            // 
+            // uxFileSystemWatcher
+            // 
+            this.uxFileSystemWatcher.EnableRaisingEvents = true;
+            this.uxFileSystemWatcher.Filter = "*.png";
+            this.uxFileSystemWatcher.SynchronizingObject = this;
+            // 
+            // QrCodeDetectorForm
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(584, 361);
+            this.Controls.Add(this.uxImageDisplay);
+            this.Controls.Add(this.uxDataGrid);
+            this.Controls.Add(this.uxMenu);
+            this.MainMenuStrip = this.uxMenu;
+            this.MinimumSize = new System.Drawing.Size(600, 400);
+            this.Name = "QrCodeDetectorForm";
+            this.Text = "QR Code Detector";
+            ((System.ComponentModel.ISupportInitialize)(this.uxDataGrid)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.uxImageHolderBindingSource)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.uxImageDisplay)).EndInit();
+            this.uxMenu.ResumeLayout(false);
+            this.uxMenu.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.uxFileSystemWatcher)).EndInit();
+            this.ResumeLayout(false);
+            this.PerformLayout();
+
+        }
+
+        #endregion
+
+        private System.Windows.Forms.DataGridView uxDataGrid;
+        private System.Windows.Forms.PictureBox uxImageDisplay;
+        private System.Windows.Forms.MenuStrip uxMenu;
+        private System.Windows.Forms.ToolStripMenuItem uxFileMenu;
+        private System.Windows.Forms.ToolStripMenuItem uxSetImageDirectory;
+        private System.Windows.Forms.FolderBrowserDialog uxImageDirectoryBrowser;
+        private System.Windows.Forms.BindingSource uxImageHolderBindingSource;
+        private System.Windows.Forms.DataGridViewTextBoxColumn filenameDataGridViewTextBoxColumn;
+        private System.IO.FileSystemWatcher uxFileSystemWatcher;
+    }
+}
+
