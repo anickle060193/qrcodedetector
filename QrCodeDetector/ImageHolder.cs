@@ -8,24 +8,24 @@ using System.Threading.Tasks;
 
 namespace QrCodeDetector
 {
-    /// <summary>
-    /// A class containing a Image definition.
-    /// </summary>
-    class ImageHolder
+    class ImageHolder : IDisposable
     {
-        /// <summary>
-        /// The full file path to the image file.
-        /// </summary>
-        public String FullFilename { get; set; }
+        private Bitmap _bitmap;
 
-        /// <summary>
-        /// The actual Image.
-        /// </summary>
-        public Bitmap Image { get; set; }
+        public String FullFilename { get; private set; }
 
-        /// <summary>
-        /// The name of the image file.
-        /// </summary>
+        public Bitmap Image
+        {
+            get
+            {
+                if( _bitmap == null )
+                {
+                    LoadImage();
+                }
+                return _bitmap;
+            }
+        }
+
         public string Filename
         {
             get
@@ -34,31 +34,34 @@ namespace QrCodeDetector
             }
         }
 
-        /// <summary>
-        /// Constructs a new ImageHolder.
-        /// </summary>
-        /// <param name="filename">The filename of the image</param>
         public ImageHolder( string filename )
         {
             FullFilename = filename;
-            LoadImage();
         }
 
-        /// <summary>
-        /// Loads and stores the image into a Bitmap.
-        /// </summary>
         private void LoadImage()
         {
-            if( File.Exists( FullFilename ) )
+            if( _bitmap == null )
             {
-                using( FileStream input = File.Open( FullFilename, FileMode.Open, FileAccess.Read ) )
+                if( File.Exists( FullFilename ) )
                 {
-                    if( Image != null )
+                    using( FileStream input = File.Open( FullFilename, FileMode.Open, FileAccess.Read ) )
                     {
-                        Image.Dispose();
+                        if( _bitmap != null )
+                        {
+                            _bitmap.Dispose();
+                        }
+                        _bitmap = new Bitmap( input );
                     }
-                    Image = new Bitmap( input );
                 }
+            }
+        }
+
+        public void Dispose()
+        {
+            if( _bitmap != null )
+            {
+                _bitmap.Dispose();
             }
         }
     }
