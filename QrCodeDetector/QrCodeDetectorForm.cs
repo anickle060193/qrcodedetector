@@ -267,7 +267,19 @@ namespace QrCodeDetector
                         string extension = Path.GetExtension( fullFilename );
                         string now = DateTime.Now.ToString( "hh-mm-ss_MM-dd-yyy" );
                         string newFilename = directory + Path.DirectorySeparatorChar + "sub" + Path.DirectorySeparatorChar + now + "_" + filename + extension;
-                        bitmap.Save( newFilename );
+                        string newDirectoryName = Path.GetDirectoryName( newFilename );
+                        if( !Directory.Exists( newDirectoryName ) )
+                        {
+                            Directory.CreateDirectory( newDirectoryName );
+                        }
+                        if( !Utitlies.HasWritePermissionOnDir( newDirectoryName ) )
+                        {
+                            MessageBox.Show( "You do not have access to write this file: " + newFilename );
+                        }
+                        else
+                        {
+                            bitmap.Save( newFilename );
+                        }
                     }
                     catch( Exception ex )
                     {
