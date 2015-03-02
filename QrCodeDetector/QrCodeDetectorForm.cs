@@ -18,6 +18,8 @@ namespace QrCodeDetector
 {
     public partial class QrCodeDetectorForm : Form
     {
+        private static readonly int MIN_SUB_SIZE = 10;
+
         private static readonly Pen PEN = new Pen( Color.Blue, 2 );
         private static readonly SolidBrush SELECTION_BRUSH = new SolidBrush( Color.FromArgb( 175, Color.LimeGreen ) );
         private static readonly Pen SELECTION_PEN = new Pen( Color.LimeGreen );
@@ -98,9 +100,11 @@ namespace QrCodeDetector
             {
                 if( 0 <= e.Cell.RowIndex && e.Cell.RowIndex < uxImageHolderBindingSource.Count )
                 {
+                    _tracking = false;
+
                     _currentImage = (ImageHolder)uxImageHolderBindingSource.List[ e.Cell.RowIndex ];
                     uxImageDisplay.Image = _currentImage.Image;
-                    DetectQrCode( _currentImage.Image );
+                    DetectQrCode();
                 }
             }
         }
@@ -166,37 +170,34 @@ namespace QrCodeDetector
             }
         }
 
-        private void DetectQrCode( Bitmap bitmap )
+        private void DetectQrCode()
         {
+            if( _currentImage == null )
+            {
+                return;
+            }
             try
             {
-                LuminanceSource source = new BitmapLuminanceSource( bitmap );
+                LuminanceSource source = new BitmapLuminanceSource( _currentImage.Image );
                 Binarizer binarizer = new HybridBinarizer( source );
                 BinaryBitmap binBitmap = new BinaryBitmap( binarizer );
-                BitMatrix bm = binBitmap.BlackMatrix;
-                Detector detector = new Detector( bm );
-                DetectorResult result = detector.detect();
+                QRCodeReader reader = new QRCodeReader();
+                Result result = reader.decode( binBitmap, HINTS );
 
                 if( result != null )
                 {
-                    ResultPoint[] points = result.Points;
+                    ResultPoint[] points = result.ResultPoints;
                     _qrPoints = new PointF[ points.Length ];
                     for( int i = 0; i < points.Length; i++ )
                     {
-                        _qrPoints[ i ] = new PointF( points[ i ].X, points[ i ].Y );
+                        if( points[ i ] != null )
+                        {
+                            _qrPoints[ i ] = new PointF( points[ i ].X, points[ i ].Y );
+                        }
                     }
                     uxImageDisplay.Invalidate();
 
-                    QRCodeReader reader = new QRCodeReader();
-                    Result res = reader.decode( binBitmap, HINTS );
-                    if( res != null )
-                    {
-                        uxQrCodeOutput.Text = res.Text;
-                    }
-                    else
-                    {
-                        uxQrCodeOutput.Text = "Could not read QR code.";
-                    }
+                    uxQrCodeOutput.Text = result.Text;
                 }
                 else
                 {
@@ -207,7 +208,7 @@ namespace QrCodeDetector
             catch( Exception ex )
             {
                 _qrPoints = null;
-                MessageBox.Show( "The following error occured:\n" + ex.StackTrace );
+                MessageBox.Show( "The following error occured:\n" + ex.ToString() );
             }
         }
 
@@ -228,34 +229,39 @@ namespace QrCodeDetector
 
         private void uxImageDisplay_MouseUp( object sender, MouseEventArgs e )
         {
-            uxImageDisplay.Invalidate();
-
             if( _tracking )
             {
                 _tracking = false;
 
+                _current = new Point( e.X, e.Y );
                 Bitmap image = _currentImage.Image;
                 int x = Math.Min( _start.X, _current.X );
                 int y = Math.Min( _start.Y, _current.Y );
                 int width = Math.Min( Math.Abs( _current.X - _start.X ), image.Width - x );
                 int height = Math.Min( Math.Abs( _current.Y - _start.Y ), image.Height - y );
-                Rectangle rect = new Rectangle( x, y, width, height );
-                Bitmap bitmap = image.Clone( rect, image.PixelFormat );
-                try
+
+                if( width >= MIN_SUB_SIZE && height >= MIN_SUB_SIZE )
                 {
-                    string fullFilename = _currentImage.FullFilename;
-                    string directory = Path.GetDirectoryName( fullFilename );
-                    string filename = Path.GetFileNameWithoutExtension( fullFilename );
-                    string extension = Path.GetExtension( fullFilename );
-                    string now = DateTime.Now.ToString( "hh-mm-ss_MM-dd-yyy" );
-                    string newFilename = directory + Path.DirectorySeparatorChar + filename + "_sub_" + now + extension;
-                    bitmap.Save( newFilename );
-                }
-                catch( Exception ex )
-                {
-                    MessageBox.Show( "The image could not be saved.\n" + ex.StackTrace );
+                    Rectangle rect = new Rectangle( x, y, width, height );
+                    Bitmap bitmap = image.Clone( rect, image.PixelFormat );
+                    try
+                    {
+                        string fullFilename = _currentImage.FullFilename;
+                        string directory = Path.GetDirectoryName( fullFilename );
+                        string filename = Path.GetFileNameWithoutExtension( fullFilename );
+                        string extension = Path.GetExtension( fullFilename );
+                        string now = DateTime.Now.ToString( "hh-mm-ss_MM-dd-yyy" );
+                        string newFilename = directory + Path.DirectorySeparatorChar + "sub" + Path.DirectorySeparatorChar + filename + "_" + now + extension;
+                        bitmap.Save( newFilename );
+                    }
+                    catch( Exception ex )
+                    {
+                        MessageBox.Show( "The image could not be saved.\n" + ex.ToString() );
+                    }
                 }
             }
+
+            uxImageDisplay.Invalidate();
         }
 
         private void uxImageDisplay_PreviewKeyDown( object sender, PreviewKeyDownEventArgs e )
@@ -266,6 +272,17 @@ namespace QrCodeDetector
                     _tracking = false;
                     uxImageDisplay.Invalidate();
                     break;
+            }
+        }
+
+        private void uxEnhance_Click( object sender, EventArgs e )
+        {
+            if( _currentImage != null )
+            {
+                CustomImage image = new CustomImage( _currentImage.Image );
+                CustomImage blurred = image.BlurImage( 9 );
+                CustomImage result = image + ( image - blurred );
+                new ImageForm( "Enhanced!...sorta", result.ConvertToBitmap() ).Show();
             }
         }
     }

@@ -62,6 +62,7 @@ namespace QrCodeDetector
             if( _bitmap != null )
             {
                 _bitmap.Dispose();
+                _bitmap = null;
             }
         }
     }
