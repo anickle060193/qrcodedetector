@@ -55,6 +55,7 @@
       <DependentUpon>ImageForm.cs</DependentUpon>
     </Compile>
     <Compile Include="ImageHolder.cs" />
+    <Compile Include="ImageManipulation.cs" />
     <Compile Include="QrCodeDetectorForm.cs">
       <SubType>Form</SubType>
     </Compile>

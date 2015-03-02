@@ -38,15 +38,15 @@
             this.uxFileSystemWatcher = new System.IO.FileSystemWatcher();
             this.uxQrCodeOutput = new System.Windows.Forms.TextBox();
             this.uxEnhance = new System.Windows.Forms.Button();
+            this.uxConstrast = new System.Windows.Forms.NumericUpDown();
             this.filenameDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.uxImageHolderBindingSource = new System.Windows.Forms.BindingSource(this.components);
-            this.uxThreshold = new System.Windows.Forms.NumericUpDown();
             ((System.ComponentModel.ISupportInitialize)(this.uxDataGrid)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.uxImageDisplay)).BeginInit();
             this.uxMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.uxFileSystemWatcher)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.uxConstrast)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.uxImageHolderBindingSource)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.uxThreshold)).BeginInit();
             this.SuspendLayout();
             // 
             // uxDataGrid
@@ -63,14 +63,16 @@
             this.uxDataGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.filenameDataGridViewTextBoxColumn});
             this.uxDataGrid.DataSource = this.uxImageHolderBindingSource;
-            this.uxDataGrid.Location = new System.Drawing.Point(12, 82);
+            this.uxDataGrid.Location = new System.Drawing.Point(12, 83);
             this.uxDataGrid.MultiSelect = false;
             this.uxDataGrid.Name = "uxDataGrid";
             this.uxDataGrid.ReadOnly = true;
             this.uxDataGrid.RowHeadersVisible = false;
-            this.uxDataGrid.Size = new System.Drawing.Size(240, 267);
+            this.uxDataGrid.Size = new System.Drawing.Size(240, 266);
             this.uxDataGrid.TabIndex = 0;
             this.uxDataGrid.CellStateChanged += new System.Windows.Forms.DataGridViewCellStateChangedEventHandler(this.uxDataGrid_CellStateChanged);
+            this.uxDataGrid.CurrentCellChanged += new System.EventHandler(this.uxDataGrid_CurrentCellChanged);
+            this.uxDataGrid.KeyUp += new System.Windows.Forms.KeyEventHandler(this.uxDataGrid_KeyUp);
             // 
             // uxImageDisplay
             // 
@@ -132,11 +134,23 @@
             // 
             this.uxEnhance.Location = new System.Drawing.Point(12, 53);
             this.uxEnhance.Name = "uxEnhance";
-            this.uxEnhance.Size = new System.Drawing.Size(183, 23);
+            this.uxEnhance.Size = new System.Drawing.Size(162, 23);
             this.uxEnhance.TabIndex = 4;
-            this.uxEnhance.Text = "Enchance!";
+            this.uxEnhance.Text = "Enhance!";
             this.uxEnhance.UseVisualStyleBackColor = true;
             this.uxEnhance.Click += new System.EventHandler(this.uxEnhance_Click);
+            // 
+            // uxConstrast
+            // 
+            this.uxConstrast.Location = new System.Drawing.Point(180, 56);
+            this.uxConstrast.Minimum = new decimal(new int[] {
+            100,
+            0,
+            0,
+            -2147483648});
+            this.uxConstrast.Name = "uxConstrast";
+            this.uxConstrast.Size = new System.Drawing.Size(72, 20);
+            this.uxConstrast.TabIndex = 5;
             // 
             // filenameDataGridViewTextBoxColumn
             // 
@@ -149,24 +163,12 @@
             // 
             this.uxImageHolderBindingSource.DataSource = typeof(QrCodeDetector.ImageHolder);
             // 
-            // uxThreshold
-            // 
-            this.uxThreshold.Location = new System.Drawing.Point(201, 56);
-            this.uxThreshold.Maximum = new decimal(new int[] {
-            255,
-            0,
-            0,
-            0});
-            this.uxThreshold.Name = "uxThreshold";
-            this.uxThreshold.Size = new System.Drawing.Size(51, 20);
-            this.uxThreshold.TabIndex = 5;
-            // 
             // QrCodeDetectorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(584, 361);
-            this.Controls.Add(this.uxThreshold);
+            this.Controls.Add(this.uxConstrast);
             this.Controls.Add(this.uxEnhance);
             this.Controls.Add(this.uxQrCodeOutput);
             this.Controls.Add(this.uxImageDisplay);
@@ -181,8 +183,8 @@
             this.uxMenu.ResumeLayout(false);
             this.uxMenu.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.uxFileSystemWatcher)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.uxConstrast)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.uxImageHolderBindingSource)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.uxThreshold)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -200,8 +202,8 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn filenameDataGridViewTextBoxColumn;
         private System.IO.FileSystemWatcher uxFileSystemWatcher;
         private System.Windows.Forms.TextBox uxQrCodeOutput;
+        private System.Windows.Forms.NumericUpDown uxConstrast;
         private System.Windows.Forms.Button uxEnhance;
-        private System.Windows.Forms.NumericUpDown uxThreshold;
     }
 }
 

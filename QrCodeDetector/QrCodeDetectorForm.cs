@@ -94,19 +94,25 @@ namespace QrCodeDetector
             return -1;
         }
 
-        private void uxDataGrid_CellStateChanged( object sender, DataGridViewCellStateChangedEventArgs e )
+        private void uxDataGrid_CurrentCellChanged( object sender, EventArgs e )
         {
-            if( e.StateChanged == DataGridViewElementStates.Selected )
+            if( uxDataGrid.CurrentCell != null )
             {
-                if( 0 <= e.Cell.RowIndex && e.Cell.RowIndex < uxImageHolderBindingSource.Count )
+                int index = uxDataGrid.CurrentCell.RowIndex;
+                if( 0 <= index && index < uxImageHolderBindingSource.Count )
                 {
                     _tracking = false;
 
-                    _currentImage = (ImageHolder)uxImageHolderBindingSource.List[ e.Cell.RowIndex ];
+                    _currentImage = (ImageHolder)uxImageHolderBindingSource.List[ index ];
                     uxImageDisplay.Image = _currentImage.Image;
                     DetectQrCode();
                 }
             }
+        }
+
+        private void uxDataGrid_CellStateChanged( object sender, DataGridViewCellStateChangedEventArgs e )
+        {
+
         }
 
         private void InvokeOnDataGrid( Action action )
@@ -244,8 +250,8 @@ namespace QrCodeDetector
 
                 _current = new Point( e.X, e.Y );
                 Bitmap image = _currentImage.Image;
-                int x = Math.Min( _start.X, _current.X );
-                int y = Math.Min( _start.Y, _current.Y );
+                int x = Math.Max( 0, Math.Min( _start.X, _current.X ) );
+                int y = Math.Max( 0, Math.Min( _start.Y, _current.Y ) );
                 int width = Math.Min( Math.Abs( _current.X - _start.X ), image.Width - x );
                 int height = Math.Min( Math.Abs( _current.Y - _start.Y ), image.Height - y );
 
@@ -260,7 +266,7 @@ namespace QrCodeDetector
                         string filename = Path.GetFileNameWithoutExtension( fullFilename );
                         string extension = Path.GetExtension( fullFilename );
                         string now = DateTime.Now.ToString( "hh-mm-ss_MM-dd-yyy" );
-                        string newFilename = directory + Path.DirectorySeparatorChar + "sub" + Path.DirectorySeparatorChar + filename + "_" + now + extension;
+                        string newFilename = directory + Path.DirectorySeparatorChar + "sub" + Path.DirectorySeparatorChar + now + "_" + filename + extension;
                         bitmap.Save( newFilename );
                     }
                     catch( Exception ex )
@@ -284,14 +290,40 @@ namespace QrCodeDetector
             }
         }
 
+        private void uxDataGrid_KeyUp( object sender, KeyEventArgs e )
+        {
+            switch( e.KeyCode )
+            {
+                case Keys.Delete:
+                    int row = uxDataGrid.CurrentCell.RowIndex;
+                    if( 0 <= row && row < uxImageHolderBindingSource.Count )
+                    {
+                        ImageHolder im = (ImageHolder)uxImageHolderBindingSource.List[ row ];
+                        uxImageHolderBindingSource.RemoveAt( row );
+                        try
+                        {
+                            File.Delete( im.FullFilename );
+                        }
+                        catch( Exception ex )
+                        {
+                            MessageBox.Show( "Could not delete selected image:\n" + ex.ToString() );
+                        }
+                        row = Math.Min( row - 1, uxImageHolderBindingSource.Count - 1 );
+                        if( 0 <= row && row < uxImageHolderBindingSource.Count )
+                        {
+                            uxDataGrid.Rows[ row ].Selected = true;
+                        }
+                    }
+                    break;
+            }
+        }
+
         private void uxEnhance_Click( object sender, EventArgs e )
         {
             if( _currentImage != null )
             {
-                CustomImage image = new CustomImage( _currentImage.Image );
-                CustomImage blurred = image.BlurImage( 9 );
-                CustomImage result = image + ( image - blurred );
-                new ImageForm( "Enhanced!...sorta", result.ConvertToBitmap() ).Show();
+                Bitmap adj = ImageManipulation.AdjustConstrast( (int)uxConstrast.Value, _currentImage.Image );
+                new ImageForm( "Adjusted", adj ).Show();
             }
         }
     }
