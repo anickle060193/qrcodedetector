@@ -139,14 +139,23 @@ namespace QrCodeDetector
             uxFileSystemWatcher.EnableRaisingEvents = true;
 
             uxImageHolderBindingSource.Clear();
-            foreach( string filename in Directory.GetFiles( _imageDirectory, "*.png" ) )
+            AddImages( new DirectoryInfo( _imageDirectory ) );
+        }
+
+        private void AddImages( DirectoryInfo dir )
+        {
+            foreach( FileInfo filename in dir.GetFiles( "*.png" ) )
             {
                 try
                 {
-                    ImageHolder im = new ImageHolder( filename );
+                    ImageHolder im = new ImageHolder( filename.FullName );
                     uxImageHolderBindingSource.Add( im );
                 }
                 catch { }
+            }
+            foreach( DirectoryInfo d in dir.GetDirectories() )
+            {
+                AddImages( d );
             }
         }
 
