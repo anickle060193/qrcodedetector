@@ -1,9 +1,12 @@
-﻿using System;
+﻿using AForge.Imaging;
+using AForge.Imaging.Filters;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -19,6 +22,7 @@ namespace QrCodeDetector
     public partial class QrCodeDetectorForm : Form
     {
         private static readonly int MIN_SUB_SIZE = 10;
+        private static readonly String[] IMAGE_EXTENSIONS = new String[] { ".png", ".jpg", ".jpeg" };
 
         private static readonly Pen PEN = new Pen( Color.Blue, 2 );
         private static readonly SolidBrush SELECTION_BRUSH = new SolidBrush( Color.FromArgb( 175, Color.LimeGreen ) );
@@ -31,7 +35,8 @@ namespace QrCodeDetector
         }
 
         private string _imageDirectory;
-        private ImageHolder _currentImage;
+        private ImageHolder _currentImageHolder;
+        private Bitmap _currentImage;
         private PointF[] _qrPoints;
         private bool _tracking;
         private Point _start;
@@ -103,8 +108,13 @@ namespace QrCodeDetector
                 {
                     _tracking = false;
 
-                    _currentImage = (ImageHolder)uxImageHolderBindingSource.List[ index ];
-                    uxImageDisplay.Image = _currentImage.Image;
+                    _currentImageHolder = (ImageHolder)uxImageHolderBindingSource.List[ index ];
+                    if( _currentImage != null )
+                    {
+                        _currentImage.Dispose();
+                    }
+                    _currentImage =_currentImageHolder.LoadImage();
+                    uxImageDisplay.Image = _currentImage;
                     DetectQrCode();
                 }
             }
@@ -150,7 +160,8 @@ namespace QrCodeDetector
 
         private void AddImages( DirectoryInfo dir )
         {
-            foreach( FileInfo filename in dir.GetFiles( "*.png" ) )
+            IEnumerable<FileInfo> files = dir.GetFiles().Where( info => IMAGE_EXTENSIONS.Any( ext => info.Name.ToLower().EndsWith( ext ) ) );
+            foreach( FileInfo filename in files )
             {
                 try
                 {
@@ -193,7 +204,7 @@ namespace QrCodeDetector
             }
             try
             {
-                LuminanceSource source = new BitmapLuminanceSource( _currentImage.Image );
+                LuminanceSource source = new BitmapLuminanceSource( _currentImage );
                 Binarizer binarizer = new HybridBinarizer( source );
                 BinaryBitmap binBitmap = new BinaryBitmap( binarizer );
                 QRCodeReader reader = new QRCodeReader();
@@ -249,41 +260,45 @@ namespace QrCodeDetector
                 _tracking = false;
 
                 _current = new Point( e.X, e.Y );
-                Bitmap image = _currentImage.Image;
-                int x = Math.Max( 0, Math.Min( _start.X, _current.X ) );
-                int y = Math.Max( 0, Math.Min( _start.Y, _current.Y ) );
-                int width = Math.Min( Math.Abs( _current.X - _start.X ), image.Width - x );
-                int height = Math.Min( Math.Abs( _current.Y - _start.Y ), image.Height - y );
-
-                if( width >= MIN_SUB_SIZE && height >= MIN_SUB_SIZE )
+                using( Bitmap image = _currentImage )
                 {
-                    Rectangle rect = new Rectangle( x, y, width, height );
-                    Bitmap bitmap = image.Clone( rect, image.PixelFormat );
-                    try
+                    int x = Math.Max( 0, Math.Min( _start.X, _current.X ) );
+                    int y = Math.Max( 0, Math.Min( _start.Y, _current.Y ) );
+                    int width = Math.Min( Math.Abs( _current.X - _start.X ), image.Width - x );
+                    int height = Math.Min( Math.Abs( _current.Y - _start.Y ), image.Height - y );
+
+                    if( width >= MIN_SUB_SIZE && height >= MIN_SUB_SIZE )
                     {
-                        string fullFilename = _currentImage.FullFilename;
-                        string directory = Path.GetDirectoryName( fullFilename );
-                        string filename = Path.GetFileNameWithoutExtension( fullFilename );
-                        string extension = Path.GetExtension( fullFilename );
-                        string now = DateTime.Now.ToString( "hh-mm-ss_MM-dd-yyy" );
-                        string newFilename = directory + Path.DirectorySeparatorChar + "sub" + Path.DirectorySeparatorChar + now + "_" + filename + extension;
-                        string newDirectoryName = Path.GetDirectoryName( newFilename );
-                        if( !Directory.Exists( newDirectoryName ) )
+                        Rectangle rect = new Rectangle( x, y, width, height );
+                        using( Bitmap bitmap = image.Clone( rect, image.PixelFormat ) )
                         {
-                            Directory.CreateDirectory( newDirectoryName );
+                            try
+                            {
+                                string fullFilename = _currentImageHolder.FullFilename;
+                                string directory = Path.GetDirectoryName( fullFilename );
+                                string filename = Path.GetFileNameWithoutExtension( fullFilename );
+                                string extension = Path.GetExtension( fullFilename );
+                                string now = DateTime.Now.ToString( "hh-mm-ss_MM-dd-yyy" );
+                                string newFilename = directory + Path.DirectorySeparatorChar + "sub" + Path.DirectorySeparatorChar + now + "_" + filename + extension;
+                                string newDirectoryName = Path.GetDirectoryName( newFilename );
+                                if( !Directory.Exists( newDirectoryName ) )
+                                {
+                                    Directory.CreateDirectory( newDirectoryName );
+                                }
+                                if( !Utitlies.HasWritePermissionOnDir( newDirectoryName ) )
+                                {
+                                    MessageBox.Show( "You do not have access to write this file: " + newFilename );
+                                }
+                                else
+                                {
+                                    bitmap.Save( newFilename );
+                                }
+                            }
+                            catch( Exception ex )
+                            {
+                                MessageBox.Show( "The image could not be saved.\n" + ex.ToString() );
+                            }
                         }
-                        if( !Utitlies.HasWritePermissionOnDir( newDirectoryName ) )
-                        {
-                            MessageBox.Show( "You do not have access to write this file: " + newFilename );
-                        }
-                        else
-                        {
-                            bitmap.Save( newFilename );
-                        }
-                    }
-                    catch( Exception ex )
-                    {
-                        MessageBox.Show( "The image could not be saved.\n" + ex.ToString() );
                     }
                 }
             }
@@ -334,8 +349,28 @@ namespace QrCodeDetector
         {
             if( _currentImage != null )
             {
-                Bitmap adj = ImageManipulation.AdjustConstrast( (int)uxConstrast.Value, _currentImage.Image );
-                new ImageForm( "Adjusted", adj ).Show();
+                Bitmap newBitmap = new Bitmap( _currentImage );
+                Rectangle rect = new Rectangle( 0, 0, newBitmap.Width, newBitmap.Height );
+                UnmanagedImage image = new UnmanagedImage( newBitmap.LockBits( rect, ImageLockMode.ReadWrite, _currentImage.PixelFormat ) );
+
+                UnmanagedImage grayImage = null;
+                if( _currentImage.PixelFormat == PixelFormat.Format8bppIndexed )
+                {
+                    grayImage = image;
+                }
+                else
+                {
+                    grayImage = UnmanagedImage.Create( image.Width, image.Height, PixelFormat.Format8bppIndexed );
+                    Grayscale.CommonAlgorithms.BT709.Apply( image, grayImage );
+                }
+
+                DifferenceEdgeDetector edgeDetector = new DifferenceEdgeDetector();
+                UnmanagedImage edgesImage = edgeDetector.Apply( grayImage );
+
+                Threshold thresholdFilter = new Threshold( (int)uxValue.Value );
+                thresholdFilter.ApplyInPlace( edgesImage );
+
+                new ImageForm( "Edges", edgesImage.ToManagedImage() ).Show();
             }
         }
     }

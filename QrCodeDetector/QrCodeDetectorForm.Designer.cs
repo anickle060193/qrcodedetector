@@ -38,14 +38,16 @@
             this.uxFileSystemWatcher = new System.IO.FileSystemWatcher();
             this.uxQrCodeOutput = new System.Windows.Forms.TextBox();
             this.uxEnhance = new System.Windows.Forms.Button();
-            this.uxConstrast = new System.Windows.Forms.NumericUpDown();
+            this.uxValue = new System.Windows.Forms.NumericUpDown();
+            this.uxPicturePanel = new System.Windows.Forms.Panel();
             this.filenameDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.uxImageHolderBindingSource = new System.Windows.Forms.BindingSource(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.uxDataGrid)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.uxImageDisplay)).BeginInit();
             this.uxMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.uxFileSystemWatcher)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.uxConstrast)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.uxValue)).BeginInit();
+            this.uxPicturePanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.uxImageHolderBindingSource)).BeginInit();
             this.SuspendLayout();
             // 
@@ -76,12 +78,10 @@
             // 
             // uxImageDisplay
             // 
-            this.uxImageDisplay.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.uxImageDisplay.Location = new System.Drawing.Point(258, 27);
+            this.uxImageDisplay.Location = new System.Drawing.Point(3, 3);
             this.uxImageDisplay.Name = "uxImageDisplay";
-            this.uxImageDisplay.Size = new System.Drawing.Size(314, 322);
+            this.uxImageDisplay.Size = new System.Drawing.Size(105, 123);
+            this.uxImageDisplay.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
             this.uxImageDisplay.TabIndex = 1;
             this.uxImageDisplay.TabStop = false;
             this.uxImageDisplay.Paint += new System.Windows.Forms.PaintEventHandler(this.uxImageDisplay_Paint);
@@ -142,15 +142,27 @@
             // 
             // uxConstrast
             // 
-            this.uxConstrast.Location = new System.Drawing.Point(180, 56);
-            this.uxConstrast.Minimum = new decimal(new int[] {
+            this.uxValue.Location = new System.Drawing.Point(180, 56);
+            this.uxValue.Minimum = new decimal(new int[] {
             100,
             0,
             0,
             -2147483648});
-            this.uxConstrast.Name = "uxConstrast";
-            this.uxConstrast.Size = new System.Drawing.Size(72, 20);
-            this.uxConstrast.TabIndex = 5;
+            this.uxValue.Name = "uxConstrast";
+            this.uxValue.Size = new System.Drawing.Size(72, 20);
+            this.uxValue.TabIndex = 5;
+            // 
+            // uxPicturePanel
+            // 
+            this.uxPicturePanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.uxPicturePanel.AutoScroll = true;
+            this.uxPicturePanel.Controls.Add(this.uxImageDisplay);
+            this.uxPicturePanel.Location = new System.Drawing.Point(258, 27);
+            this.uxPicturePanel.Name = "uxPicturePanel";
+            this.uxPicturePanel.Size = new System.Drawing.Size(314, 322);
+            this.uxPicturePanel.TabIndex = 6;
             // 
             // filenameDataGridViewTextBoxColumn
             // 
@@ -168,10 +180,10 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(584, 361);
-            this.Controls.Add(this.uxConstrast);
+            this.Controls.Add(this.uxPicturePanel);
+            this.Controls.Add(this.uxValue);
             this.Controls.Add(this.uxEnhance);
             this.Controls.Add(this.uxQrCodeOutput);
-            this.Controls.Add(this.uxImageDisplay);
             this.Controls.Add(this.uxDataGrid);
             this.Controls.Add(this.uxMenu);
             this.MainMenuStrip = this.uxMenu;
@@ -183,7 +195,9 @@
             this.uxMenu.ResumeLayout(false);
             this.uxMenu.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.uxFileSystemWatcher)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.uxConstrast)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.uxValue)).EndInit();
+            this.uxPicturePanel.ResumeLayout(false);
+            this.uxPicturePanel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.uxImageHolderBindingSource)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -202,8 +216,9 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn filenameDataGridViewTextBoxColumn;
         private System.IO.FileSystemWatcher uxFileSystemWatcher;
         private System.Windows.Forms.TextBox uxQrCodeOutput;
-        private System.Windows.Forms.NumericUpDown uxConstrast;
+        private System.Windows.Forms.NumericUpDown uxValue;
         private System.Windows.Forms.Button uxEnhance;
+        private System.Windows.Forms.Panel uxPicturePanel;
     }
 }
 

@@ -171,7 +171,7 @@ namespace QrCodeDetector
             return image;
         }
 
-        public Bitmap ConvertToBitmap()
+        public Bitmap ToBitmap()
         {
             Bitmap bitmap = new Bitmap( Width, Height );
             for( int x = 0; x < Width; x++ )

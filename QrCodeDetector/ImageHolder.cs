@@ -8,23 +8,9 @@ using System.Threading.Tasks;
 
 namespace QrCodeDetector
 {
-    class ImageHolder : IDisposable
+    class ImageHolder
     {
-        private Bitmap _bitmap;
-
         public String FullFilename { get; private set; }
-
-        public Bitmap Image
-        {
-            get
-            {
-                if( _bitmap == null )
-                {
-                    LoadImage();
-                }
-                return _bitmap;
-            }
-        }
 
         public string Filename
         {
@@ -39,30 +25,18 @@ namespace QrCodeDetector
             FullFilename = filename;
         }
 
-        private void LoadImage()
+        public Bitmap LoadImage()
         {
-            if( _bitmap == null )
+            if( File.Exists( FullFilename ) )
             {
-                if( File.Exists( FullFilename ) )
+                using( FileStream input = File.Open( FullFilename, FileMode.Open, FileAccess.Read ) )
                 {
-                    using( FileStream input = File.Open( FullFilename, FileMode.Open, FileAccess.Read ) )
-                    {
-                        if( _bitmap != null )
-                        {
-                            _bitmap.Dispose();
-                        }
-                        _bitmap = new Bitmap( input );
-                    }
+                    return new Bitmap( input );
                 }
             }
-        }
-
-        public void Dispose()
-        {
-            if( _bitmap != null )
+            else
             {
-                _bitmap.Dispose();
-                _bitmap = null;
+                throw new ArgumentException( "Image file does not exist: " + FullFilename );
             }
         }
     }
