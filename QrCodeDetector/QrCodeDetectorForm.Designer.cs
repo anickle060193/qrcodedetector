@@ -72,7 +72,6 @@
             this.uxDataGrid.RowHeadersVisible = false;
             this.uxDataGrid.Size = new System.Drawing.Size(240, 266);
             this.uxDataGrid.TabIndex = 0;
-            this.uxDataGrid.CellStateChanged += new System.Windows.Forms.DataGridViewCellStateChangedEventHandler(this.uxDataGrid_CellStateChanged);
             this.uxDataGrid.CurrentCellChanged += new System.EventHandler(this.uxDataGrid_CurrentCellChanged);
             this.uxDataGrid.KeyUp += new System.Windows.Forms.KeyEventHandler(this.uxDataGrid_KeyUp);
             // 

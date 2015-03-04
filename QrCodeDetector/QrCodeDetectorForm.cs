@@ -1,5 +1,7 @@
-﻿using AForge.Imaging;
+﻿using AForge;
+using AForge.Imaging;
 using AForge.Imaging.Filters;
+using AForge.Math.Geometry;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -34,13 +36,14 @@ namespace QrCodeDetector
             HINTS.Add( DecodeHintType.POSSIBLE_FORMATS, BarcodeFormat.QR_CODE );
         }
 
+        private List<List<IntPoint>> _corners = new List<List<IntPoint>>();
         private string _imageDirectory;
         private ImageHolder _currentImageHolder;
         private Bitmap _currentImage;
         private PointF[] _qrPoints;
         private bool _tracking;
-        private Point _start;
-        private Point _current;
+        private System.Drawing.Point _start;
+        private System.Drawing.Point _current;
 
         public QrCodeDetectorForm()
         {
@@ -120,11 +123,6 @@ namespace QrCodeDetector
             }
         }
 
-        private void uxDataGrid_CellStateChanged( object sender, DataGridViewCellStateChangedEventArgs e )
-        {
-
-        }
-
         private void InvokeOnDataGrid( Action action )
         {
             if( uxDataGrid.InvokeRequired )
@@ -184,8 +182,8 @@ namespace QrCodeDetector
                 g.DrawPolygon( PEN, _qrPoints );
             }
             if( _tracking
-             && _start != Point.Empty
-             && _current != Point.Empty )
+             && _start != System.Drawing.Point.Empty
+             && _current != System.Drawing.Point.Empty )
             {
                 int x = Math.Min( _start.X, _current.X );
                 int y = Math.Min( _start.Y, _current.Y );
@@ -193,6 +191,12 @@ namespace QrCodeDetector
                 int height = Math.Abs( _current.Y - _start.Y );
                 g.FillRectangle( SELECTION_BRUSH, x, y, width, height );
                 g.DrawRectangle( SELECTION_PEN, x, y, width, height );
+            }
+
+            foreach( List<IntPoint> cornerList in _corners )
+            {
+                System.Drawing.Point[] points = cornerList.ConvertAll( intPoint => new System.Drawing.Point( intPoint.X, intPoint.Y ) ).ToArray();
+                g.DrawPolygon( Pens.Red, points );
             }
         }
 
@@ -241,14 +245,14 @@ namespace QrCodeDetector
         private void uxImageDisplay_MouseDown( object sender, MouseEventArgs e )
         {
             _tracking = _currentImage != null;
-            _start = new Point( e.X, e.Y );
+            _start = new System.Drawing.Point( e.X, e.Y );
         }
 
         private void uxImageDisplay_MouseMove( object sender, MouseEventArgs e )
         {
             if( _tracking )
             {
-                _current = new Point( e.X, e.Y );
+                _current = new System.Drawing.Point( e.X, e.Y );
                 uxImageDisplay.Invalidate();
             }
         }
@@ -259,7 +263,7 @@ namespace QrCodeDetector
             {
                 _tracking = false;
 
-                _current = new Point( e.X, e.Y );
+                _current = new System.Drawing.Point( e.X, e.Y );
                 using( Bitmap image = _currentImage )
                 {
                     int x = Math.Max( 0, Math.Min( _start.X, _current.X ) );
@@ -367,11 +371,107 @@ namespace QrCodeDetector
                 DifferenceEdgeDetector edgeDetector = new DifferenceEdgeDetector();
                 UnmanagedImage edgesImage = edgeDetector.Apply( grayImage );
 
-                Threshold thresholdFilter = new Threshold( (int)uxValue.Value );
+                Threshold thresholdFilter = new Threshold( 40 ); //(int)uxValue.Value );
                 thresholdFilter.ApplyInPlace( edgesImage );
 
                 new ImageForm( "Edges", edgesImage.ToManagedImage() ).Show();
+
+                BlobCounter blobCounter = new BlobCounter();
+                blobCounter.MinHeight = 10;
+                blobCounter.MinHeight = 10;
+                blobCounter.FilterBlobs = true;
+                blobCounter.ObjectsOrder = ObjectsOrder.Size;
+
+                blobCounter.ProcessImage( edgesImage );
+                Blob[] blobs = blobCounter.GetObjectsInformation();
+
+                _corners.Clear();
+                foreach( Blob blob in blobs )
+                {
+                    List<IntPoint> edgePoints = blobCounter.GetBlobsEdgePoints( blob );
+                    List<IntPoint> corners = null;
+
+                    SimpleShapeChecker shapeChecker = new SimpleShapeChecker();
+                    
+                    if( shapeChecker.IsQuadrilateral( edgePoints, out corners ) )
+                    {
+                        List<IntPoint> leftEdgePoints, rightEdgePoints;
+                        blobCounter.GetBlobsLeftAndRightEdges( blob, out leftEdgePoints, out rightEdgePoints );
+
+                        float diff = CalculateAverageEdgesBrightnessDifference( leftEdgePoints, rightEdgePoints, grayImage );
+
+                        if( diff > 20 )
+                        {
+                            _corners.Add( corners );
+                        }
+                    }
+                }
+
+                uxImageDisplay.Invalidate();
             }
+        }
+
+        // Calculate average brightness difference between pixels outside and
+        // inside of the object bounded by specified left and right edge
+        private float CalculateAverageEdgesBrightnessDifference(
+            List<IntPoint> leftEdgePoints,
+            List<IntPoint> rightEdgePoints,
+            UnmanagedImage image )
+        {
+            const int stepSize = 3;
+            
+            // create list of points, which are a bit on the left/right from edges
+            List<IntPoint> leftEdgePoints1 = new List<IntPoint>();
+            List<IntPoint> leftEdgePoints2 = new List<IntPoint>();
+            List<IntPoint> rightEdgePoints1 = new List<IntPoint>();
+            List<IntPoint> rightEdgePoints2 = new List<IntPoint>();
+
+            int tx1, tx2, ty;
+            int widthM1 = image.Width - 1;
+
+            for( int k = 0; k < leftEdgePoints.Count; k++ )
+            {
+                tx1 = leftEdgePoints[ k ].X - stepSize;
+                tx2 = leftEdgePoints[ k ].X + stepSize;
+                ty = leftEdgePoints[ k ].Y;
+
+                leftEdgePoints1.Add( new IntPoint(
+                    ( tx1 < 0 ) ? 0 : tx1, ty ) );
+                leftEdgePoints2.Add( new IntPoint(
+                    ( tx2 > widthM1 ) ? widthM1 : tx2, ty ) );
+
+                tx1 = rightEdgePoints[ k ].X - stepSize;
+                tx2 = rightEdgePoints[ k ].X + stepSize;
+                ty = rightEdgePoints[ k ].Y;
+
+                rightEdgePoints1.Add( new IntPoint(
+                    ( tx1 < 0 ) ? 0 : tx1, ty ) );
+                rightEdgePoints2.Add( new IntPoint(
+                    ( tx2 > widthM1 ) ? widthM1 : tx2, ty ) );
+            }
+
+            // collect pixel values from specified points
+            byte[] leftValues1 = image.Collect8bppPixelValues( leftEdgePoints1 );
+            byte[] leftValues2 = image.Collect8bppPixelValues( leftEdgePoints2 );
+            byte[] rightValues1 = image.Collect8bppPixelValues( rightEdgePoints1 );
+            byte[] rightValues2 = image.Collect8bppPixelValues( rightEdgePoints2 );
+
+            // calculate average difference between pixel values from outside of
+            // the shape and from inside
+            float diff = 0;
+            int pixelCount = 0;
+
+            for( int k = 0; k < leftEdgePoints.Count; k++ )
+            {
+                if( rightEdgePoints[ k ].X - leftEdgePoints[ k ].X > stepSize * 2 )
+                {
+                    diff += ( leftValues1[ k ] - leftValues2[ k ] );
+                    diff += ( rightValues2[ k ] - rightValues1[ k ] );
+                    pixelCount += 2;
+                }
+            }
+
+            return diff / pixelCount;
         }
     }
 }
