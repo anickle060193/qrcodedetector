@@ -29,67 +29,51 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.uxDataGrid = new System.Windows.Forms.DataGridView();
-            this.uxImageDisplay = new System.Windows.Forms.PictureBox();
             this.uxMenu = new System.Windows.Forms.MenuStrip();
             this.uxFileMenu = new System.Windows.Forms.ToolStripMenuItem();
-            this.uxSetImageDirectory = new System.Windows.Forms.ToolStripMenuItem();
+            this.uxSetImageWatchDirectoryMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.uxImageDirectoryBrowser = new System.Windows.Forms.FolderBrowserDialog();
             this.uxFileSystemWatcher = new System.IO.FileSystemWatcher();
-            this.uxQrCodeOutput = new System.Windows.Forms.TextBox();
             this.uxEnhance = new System.Windows.Forms.Button();
             this.uxValue = new System.Windows.Forms.NumericUpDown();
-            this.uxPicturePanel = new System.Windows.Forms.Panel();
-            this.uxMemory = new System.Windows.Forms.TextBox();
             this.uxTimer = new System.Windows.Forms.Timer(this.components);
-            this.filenameDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.uxDataGrid = new System.Windows.Forms.DataGridView();
+            this.Filename = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.QrCodeData = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.uxImageHolderBindingSource = new System.Windows.Forms.BindingSource(this.components);
-            ((System.ComponentModel.ISupportInitialize)(this.uxDataGrid)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.uxImageDisplay)).BeginInit();
+            this.uxImageDisplay = new System.Windows.Forms.PictureBox();
+            this.uxHorizontalSplitContainer = new System.Windows.Forms.SplitContainer();
+            this.uxControlsGroup = new System.Windows.Forms.GroupBox();
+            this.uxAutoDetectControls = new System.Windows.Forms.GroupBox();
+            this.uxAutoDetectOnAdd = new System.Windows.Forms.RadioButton();
+            this.uxAutoDetectOnView = new System.Windows.Forms.RadioButton();
+            this.uxAutoDetectDisabled = new System.Windows.Forms.RadioButton();
+            this.uxAutoAddImages = new System.Windows.Forms.CheckBox();
+            this.uxAddImages = new System.Windows.Forms.Button();
+            this.uxSetImageWatchDirectory = new System.Windows.Forms.Button();
+            this.uxValueLabel = new System.Windows.Forms.Label();
+            this.uxQrDataLabel = new System.Windows.Forms.Label();
+            this.uxStatusStrip = new System.Windows.Forms.StatusStrip();
+            this.uxStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.uxBytesUsed = new System.Windows.Forms.ToolStripStatusLabel();
+            this.uxOutput = new System.Windows.Forms.GroupBox();
+            this.uxQrCodeData = new System.Windows.Forms.RichTextBox();
+            this.uxOpenFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.uxMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.uxFileSystemWatcher)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.uxValue)).BeginInit();
-            this.uxPicturePanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.uxDataGrid)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.uxImageHolderBindingSource)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.uxImageDisplay)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.uxHorizontalSplitContainer)).BeginInit();
+            this.uxHorizontalSplitContainer.Panel1.SuspendLayout();
+            this.uxHorizontalSplitContainer.Panel2.SuspendLayout();
+            this.uxHorizontalSplitContainer.SuspendLayout();
+            this.uxControlsGroup.SuspendLayout();
+            this.uxAutoDetectControls.SuspendLayout();
+            this.uxStatusStrip.SuspendLayout();
+            this.uxOutput.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // uxDataGrid
-            // 
-            this.uxDataGrid.AllowUserToAddRows = false;
-            this.uxDataGrid.AllowUserToDeleteRows = false;
-            this.uxDataGrid.AllowUserToOrderColumns = true;
-            this.uxDataGrid.AllowUserToResizeRows = false;
-            this.uxDataGrid.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
-            this.uxDataGrid.AutoGenerateColumns = false;
-            this.uxDataGrid.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.uxDataGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.uxDataGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.filenameDataGridViewTextBoxColumn});
-            this.uxDataGrid.DataSource = this.uxImageHolderBindingSource;
-            this.uxDataGrid.Location = new System.Drawing.Point(12, 108);
-            this.uxDataGrid.MultiSelect = false;
-            this.uxDataGrid.Name = "uxDataGrid";
-            this.uxDataGrid.ReadOnly = true;
-            this.uxDataGrid.RowHeadersVisible = false;
-            this.uxDataGrid.Size = new System.Drawing.Size(240, 241);
-            this.uxDataGrid.TabIndex = 0;
-            this.uxDataGrid.CurrentCellChanged += new System.EventHandler(this.uxDataGrid_CurrentCellChanged);
-            this.uxDataGrid.KeyUp += new System.Windows.Forms.KeyEventHandler(this.uxDataGrid_KeyUp);
-            // 
-            // uxImageDisplay
-            // 
-            this.uxImageDisplay.Location = new System.Drawing.Point(3, 3);
-            this.uxImageDisplay.Name = "uxImageDisplay";
-            this.uxImageDisplay.Size = new System.Drawing.Size(105, 123);
-            this.uxImageDisplay.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
-            this.uxImageDisplay.TabIndex = 1;
-            this.uxImageDisplay.TabStop = false;
-            this.uxImageDisplay.Paint += new System.Windows.Forms.PaintEventHandler(this.uxImageDisplay_Paint);
-            this.uxImageDisplay.MouseDown += new System.Windows.Forms.MouseEventHandler(this.uxImageDisplay_MouseDown);
-            this.uxImageDisplay.MouseMove += new System.Windows.Forms.MouseEventHandler(this.uxImageDisplay_MouseMove);
-            this.uxImageDisplay.MouseUp += new System.Windows.Forms.MouseEventHandler(this.uxImageDisplay_MouseUp);
-            this.uxImageDisplay.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.uxImageDisplay_PreviewKeyDown);
             // 
             // uxMenu
             // 
@@ -97,45 +81,36 @@
             this.uxFileMenu});
             this.uxMenu.Location = new System.Drawing.Point(0, 0);
             this.uxMenu.Name = "uxMenu";
-            this.uxMenu.Size = new System.Drawing.Size(584, 24);
+            this.uxMenu.Size = new System.Drawing.Size(663, 24);
             this.uxMenu.TabIndex = 2;
             this.uxMenu.Text = "menuStrip1";
             // 
             // uxFileMenu
             // 
             this.uxFileMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.uxSetImageDirectory});
+            this.uxSetImageWatchDirectoryMenuItem});
             this.uxFileMenu.Name = "uxFileMenu";
             this.uxFileMenu.Size = new System.Drawing.Size(37, 20);
             this.uxFileMenu.Text = "File";
             // 
-            // uxSetImageDirectory
+            // uxSetImageWatchDirectoryMenuItem
             // 
-            this.uxSetImageDirectory.Name = "uxSetImageDirectory";
-            this.uxSetImageDirectory.Size = new System.Drawing.Size(177, 22);
-            this.uxSetImageDirectory.Text = "Set Image Directory";
-            this.uxSetImageDirectory.Click += new System.EventHandler(this.uxSetImageDirectory_Click);
+            this.uxSetImageWatchDirectoryMenuItem.Name = "uxSetImageWatchDirectoryMenuItem";
+            this.uxSetImageWatchDirectoryMenuItem.Size = new System.Drawing.Size(214, 22);
+            this.uxSetImageWatchDirectoryMenuItem.Text = "Set Image Watch Directory";
+            this.uxSetImageWatchDirectoryMenuItem.Click += new System.EventHandler(this.uxSetImageDirectory_Click);
             // 
             // uxFileSystemWatcher
             // 
             this.uxFileSystemWatcher.EnableRaisingEvents = true;
-            this.uxFileSystemWatcher.Filter = "*.png";
             this.uxFileSystemWatcher.IncludeSubdirectories = true;
             this.uxFileSystemWatcher.SynchronizingObject = this;
             // 
-            // uxQrCodeOutput
-            // 
-            this.uxQrCodeOutput.Location = new System.Drawing.Point(12, 27);
-            this.uxQrCodeOutput.Name = "uxQrCodeOutput";
-            this.uxQrCodeOutput.ReadOnly = true;
-            this.uxQrCodeOutput.Size = new System.Drawing.Size(240, 20);
-            this.uxQrCodeOutput.TabIndex = 3;
-            // 
             // uxEnhance
             // 
-            this.uxEnhance.Location = new System.Drawing.Point(12, 53);
+            this.uxEnhance.Location = new System.Drawing.Point(6, 180);
             this.uxEnhance.Name = "uxEnhance";
-            this.uxEnhance.Size = new System.Drawing.Size(162, 23);
+            this.uxEnhance.Size = new System.Drawing.Size(218, 23);
             this.uxEnhance.TabIndex = 4;
             this.uxEnhance.Text = "Enhance!";
             this.uxEnhance.UseVisualStyleBackColor = true;
@@ -148,14 +123,14 @@
             0,
             0,
             0});
-            this.uxValue.Location = new System.Drawing.Point(180, 56);
+            this.uxValue.Location = new System.Drawing.Point(49, 154);
             this.uxValue.Minimum = new decimal(new int[] {
             100,
             0,
             0,
             -2147483648});
             this.uxValue.Name = "uxValue";
-            this.uxValue.Size = new System.Drawing.Size(72, 20);
+            this.uxValue.Size = new System.Drawing.Size(175, 20);
             this.uxValue.TabIndex = 5;
             this.uxValue.Value = new decimal(new int[] {
             40,
@@ -163,69 +138,289 @@
             0,
             0});
             // 
-            // uxPicturePanel
-            // 
-            this.uxPicturePanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.uxPicturePanel.AutoScroll = true;
-            this.uxPicturePanel.Controls.Add(this.uxImageDisplay);
-            this.uxPicturePanel.Location = new System.Drawing.Point(258, 27);
-            this.uxPicturePanel.Name = "uxPicturePanel";
-            this.uxPicturePanel.Size = new System.Drawing.Size(314, 322);
-            this.uxPicturePanel.TabIndex = 6;
-            // 
-            // uxMemory
-            // 
-            this.uxMemory.Location = new System.Drawing.Point(12, 82);
-            this.uxMemory.Name = "uxMemory";
-            this.uxMemory.ReadOnly = true;
-            this.uxMemory.Size = new System.Drawing.Size(240, 20);
-            this.uxMemory.TabIndex = 7;
-            this.uxMemory.Text = "0 Bytes";
-            this.uxMemory.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            // 
             // uxTimer
             // 
             this.uxTimer.Enabled = true;
             this.uxTimer.Tick += new System.EventHandler(this.uxTimer_Tick);
             // 
-            // filenameDataGridViewTextBoxColumn
+            // uxDataGrid
             // 
-            this.filenameDataGridViewTextBoxColumn.DataPropertyName = "Filename";
-            this.filenameDataGridViewTextBoxColumn.HeaderText = "Filename";
-            this.filenameDataGridViewTextBoxColumn.Name = "filenameDataGridViewTextBoxColumn";
-            this.filenameDataGridViewTextBoxColumn.ReadOnly = true;
+            this.uxDataGrid.AllowUserToAddRows = false;
+            this.uxDataGrid.AllowUserToDeleteRows = false;
+            this.uxDataGrid.AllowUserToOrderColumns = true;
+            this.uxDataGrid.AllowUserToResizeRows = false;
+            this.uxDataGrid.AutoGenerateColumns = false;
+            this.uxDataGrid.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.uxDataGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.uxDataGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.Filename,
+            this.QrCodeData});
+            this.uxDataGrid.DataSource = this.uxImageHolderBindingSource;
+            this.uxDataGrid.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.uxDataGrid.Location = new System.Drawing.Point(0, 0);
+            this.uxDataGrid.MultiSelect = false;
+            this.uxDataGrid.Name = "uxDataGrid";
+            this.uxDataGrid.ReadOnly = true;
+            this.uxDataGrid.RowHeadersVisible = false;
+            this.uxDataGrid.Size = new System.Drawing.Size(403, 106);
+            this.uxDataGrid.TabIndex = 0;
+            this.uxDataGrid.CurrentCellChanged += new System.EventHandler(this.uxDataGrid_CurrentCellChanged);
+            this.uxDataGrid.KeyUp += new System.Windows.Forms.KeyEventHandler(this.uxDataGrid_KeyUp);
+            // 
+            // Filename
+            // 
+            this.Filename.DataPropertyName = "Filename";
+            this.Filename.HeaderText = "Filename";
+            this.Filename.Name = "Filename";
+            this.Filename.ReadOnly = true;
+            // 
+            // QrCodeData
+            // 
+            this.QrCodeData.DataPropertyName = "QrCodeData";
+            this.QrCodeData.HeaderText = "Qr Code Data";
+            this.QrCodeData.Name = "QrCodeData";
+            this.QrCodeData.ReadOnly = true;
             // 
             // uxImageHolderBindingSource
             // 
             this.uxImageHolderBindingSource.DataSource = typeof(QrCodeDetector.ImageHolder);
             // 
+            // uxImageDisplay
+            // 
+            this.uxImageDisplay.Location = new System.Drawing.Point(3, 3);
+            this.uxImageDisplay.Name = "uxImageDisplay";
+            this.uxImageDisplay.Size = new System.Drawing.Size(96, 94);
+            this.uxImageDisplay.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
+            this.uxImageDisplay.TabIndex = 1;
+            this.uxImageDisplay.TabStop = false;
+            this.uxImageDisplay.Paint += new System.Windows.Forms.PaintEventHandler(this.uxImageDisplay_Paint);
+            this.uxImageDisplay.MouseDown += new System.Windows.Forms.MouseEventHandler(this.uxImageDisplay_MouseDown);
+            this.uxImageDisplay.MouseMove += new System.Windows.Forms.MouseEventHandler(this.uxImageDisplay_MouseMove);
+            this.uxImageDisplay.MouseUp += new System.Windows.Forms.MouseEventHandler(this.uxImageDisplay_MouseUp);
+            this.uxImageDisplay.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.uxImageDisplay_PreviewKeyDown);
+            // 
+            // uxHorizontalSplitContainer
+            // 
+            this.uxHorizontalSplitContainer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.uxHorizontalSplitContainer.Location = new System.Drawing.Point(248, 27);
+            this.uxHorizontalSplitContainer.Name = "uxHorizontalSplitContainer";
+            this.uxHorizontalSplitContainer.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // uxHorizontalSplitContainer.Panel1
+            // 
+            this.uxHorizontalSplitContainer.Panel1.AutoScroll = true;
+            this.uxHorizontalSplitContainer.Panel1.Controls.Add(this.uxImageDisplay);
+            // 
+            // uxHorizontalSplitContainer.Panel2
+            // 
+            this.uxHorizontalSplitContainer.Panel2.AutoScroll = true;
+            this.uxHorizontalSplitContainer.Panel2.Controls.Add(this.uxDataGrid);
+            this.uxHorizontalSplitContainer.Size = new System.Drawing.Size(403, 386);
+            this.uxHorizontalSplitContainer.SplitterDistance = 276;
+            this.uxHorizontalSplitContainer.TabIndex = 8;
+            // 
+            // uxControlsGroup
+            // 
+            this.uxControlsGroup.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.uxControlsGroup.Controls.Add(this.uxAutoDetectControls);
+            this.uxControlsGroup.Controls.Add(this.uxAutoAddImages);
+            this.uxControlsGroup.Controls.Add(this.uxAddImages);
+            this.uxControlsGroup.Controls.Add(this.uxSetImageWatchDirectory);
+            this.uxControlsGroup.Controls.Add(this.uxValueLabel);
+            this.uxControlsGroup.Controls.Add(this.uxValue);
+            this.uxControlsGroup.Controls.Add(this.uxEnhance);
+            this.uxControlsGroup.Location = new System.Drawing.Point(12, 96);
+            this.uxControlsGroup.Name = "uxControlsGroup";
+            this.uxControlsGroup.Size = new System.Drawing.Size(230, 317);
+            this.uxControlsGroup.TabIndex = 9;
+            this.uxControlsGroup.TabStop = false;
+            this.uxControlsGroup.Text = "Controls";
+            // 
+            // uxAutoDetectControls
+            // 
+            this.uxAutoDetectControls.Controls.Add(this.uxAutoDetectOnAdd);
+            this.uxAutoDetectControls.Controls.Add(this.uxAutoDetectOnView);
+            this.uxAutoDetectControls.Controls.Add(this.uxAutoDetectDisabled);
+            this.uxAutoDetectControls.Location = new System.Drawing.Point(6, 100);
+            this.uxAutoDetectControls.Name = "uxAutoDetectControls";
+            this.uxAutoDetectControls.Size = new System.Drawing.Size(215, 48);
+            this.uxAutoDetectControls.TabIndex = 11;
+            this.uxAutoDetectControls.TabStop = false;
+            this.uxAutoDetectControls.Text = "Auto-Detect Options";
+            // 
+            // uxAutoDetectOnAdd
+            // 
+            this.uxAutoDetectOnAdd.AutoSize = true;
+            this.uxAutoDetectOnAdd.Checked = true;
+            this.uxAutoDetectOnAdd.Location = new System.Drawing.Point(149, 19);
+            this.uxAutoDetectOnAdd.Name = "uxAutoDetectOnAdd";
+            this.uxAutoDetectOnAdd.Size = new System.Drawing.Size(61, 17);
+            this.uxAutoDetectOnAdd.TabIndex = 2;
+            this.uxAutoDetectOnAdd.TabStop = true;
+            this.uxAutoDetectOnAdd.Text = "On Add";
+            this.uxAutoDetectOnAdd.UseVisualStyleBackColor = true;
+            // 
+            // uxAutoDetectOnView
+            // 
+            this.uxAutoDetectOnView.AutoSize = true;
+            this.uxAutoDetectOnView.Location = new System.Drawing.Point(78, 19);
+            this.uxAutoDetectOnView.Name = "uxAutoDetectOnView";
+            this.uxAutoDetectOnView.Size = new System.Drawing.Size(65, 17);
+            this.uxAutoDetectOnView.TabIndex = 1;
+            this.uxAutoDetectOnView.Text = "On View";
+            this.uxAutoDetectOnView.UseVisualStyleBackColor = true;
+            // 
+            // uxAutoDetectDisabled
+            // 
+            this.uxAutoDetectDisabled.AutoSize = true;
+            this.uxAutoDetectDisabled.Location = new System.Drawing.Point(6, 19);
+            this.uxAutoDetectDisabled.Name = "uxAutoDetectDisabled";
+            this.uxAutoDetectDisabled.Size = new System.Drawing.Size(66, 17);
+            this.uxAutoDetectDisabled.TabIndex = 0;
+            this.uxAutoDetectDisabled.Text = "Disabled";
+            this.uxAutoDetectDisabled.UseVisualStyleBackColor = true;
+            // 
+            // uxAutoAddImages
+            // 
+            this.uxAutoAddImages.AutoSize = true;
+            this.uxAutoAddImages.Location = new System.Drawing.Point(6, 48);
+            this.uxAutoAddImages.Name = "uxAutoAddImages";
+            this.uxAutoAddImages.Size = new System.Drawing.Size(210, 17);
+            this.uxAutoAddImages.TabIndex = 9;
+            this.uxAutoAddImages.Text = "Auto-Add Images from Watch Directory";
+            this.uxAutoAddImages.UseVisualStyleBackColor = true;
+            this.uxAutoAddImages.CheckedChanged += new System.EventHandler(this.uxAutoAddImages_CheckedChanged);
+            // 
+            // uxAddImages
+            // 
+            this.uxAddImages.Location = new System.Drawing.Point(6, 19);
+            this.uxAddImages.Name = "uxAddImages";
+            this.uxAddImages.Size = new System.Drawing.Size(218, 23);
+            this.uxAddImages.TabIndex = 8;
+            this.uxAddImages.Text = "Add Image(s)";
+            this.uxAddImages.UseVisualStyleBackColor = true;
+            this.uxAddImages.Click += new System.EventHandler(this.uxAddImages_Click);
+            // 
+            // uxSetImageWatchDirectory
+            // 
+            this.uxSetImageWatchDirectory.Location = new System.Drawing.Point(3, 71);
+            this.uxSetImageWatchDirectory.Name = "uxSetImageWatchDirectory";
+            this.uxSetImageWatchDirectory.Size = new System.Drawing.Size(218, 23);
+            this.uxSetImageWatchDirectory.TabIndex = 7;
+            this.uxSetImageWatchDirectory.Text = "Set Image Watch Directory";
+            this.uxSetImageWatchDirectory.UseVisualStyleBackColor = true;
+            this.uxSetImageWatchDirectory.Click += new System.EventHandler(this.uxSetImageDirectory_Click);
+            // 
+            // uxValueLabel
+            // 
+            this.uxValueLabel.AutoSize = true;
+            this.uxValueLabel.Location = new System.Drawing.Point(6, 156);
+            this.uxValueLabel.Name = "uxValueLabel";
+            this.uxValueLabel.Size = new System.Drawing.Size(37, 13);
+            this.uxValueLabel.TabIndex = 6;
+            this.uxValueLabel.Text = "Value:";
+            // 
+            // uxQrDataLabel
+            // 
+            this.uxQrDataLabel.AutoSize = true;
+            this.uxQrDataLabel.Location = new System.Drawing.Point(6, 16);
+            this.uxQrDataLabel.Name = "uxQrDataLabel";
+            this.uxQrDataLabel.Size = new System.Drawing.Size(80, 13);
+            this.uxQrDataLabel.TabIndex = 7;
+            this.uxQrDataLabel.Text = "QR Code Data:";
+            // 
+            // uxStatusStrip
+            // 
+            this.uxStatusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.uxStatusLabel,
+            this.uxBytesUsed});
+            this.uxStatusStrip.Location = new System.Drawing.Point(0, 416);
+            this.uxStatusStrip.Name = "uxStatusStrip";
+            this.uxStatusStrip.ShowItemToolTips = true;
+            this.uxStatusStrip.Size = new System.Drawing.Size(663, 22);
+            this.uxStatusStrip.TabIndex = 10;
+            // 
+            // uxStatusLabel
+            // 
+            this.uxStatusLabel.Name = "uxStatusLabel";
+            this.uxStatusLabel.Size = new System.Drawing.Size(575, 17);
+            this.uxStatusLabel.Spring = true;
+            this.uxStatusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.uxStatusLabel.Click += new System.EventHandler(this.uxStatusLabel_Click);
+            // 
+            // uxBytesUsed
+            // 
+            this.uxBytesUsed.Name = "uxBytesUsed";
+            this.uxBytesUsed.Size = new System.Drawing.Size(73, 17);
+            this.uxBytesUsed.Text = "0 Bytes Used";
+            this.uxBytesUsed.ToolTipText = "Total Bytes Currently Used by Program";
+            // 
+            // uxOutput
+            // 
+            this.uxOutput.Controls.Add(this.uxQrCodeData);
+            this.uxOutput.Controls.Add(this.uxQrDataLabel);
+            this.uxOutput.Location = new System.Drawing.Point(12, 27);
+            this.uxOutput.Name = "uxOutput";
+            this.uxOutput.Size = new System.Drawing.Size(230, 63);
+            this.uxOutput.TabIndex = 11;
+            this.uxOutput.TabStop = false;
+            this.uxOutput.Text = "Output";
+            // 
+            // uxQrCodeData
+            // 
+            this.uxQrCodeData.AutoWordSelection = true;
+            this.uxQrCodeData.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.uxQrCodeData.Location = new System.Drawing.Point(6, 32);
+            this.uxQrCodeData.Multiline = false;
+            this.uxQrCodeData.Name = "uxQrCodeData";
+            this.uxQrCodeData.ReadOnly = true;
+            this.uxQrCodeData.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
+            this.uxQrCodeData.Size = new System.Drawing.Size(218, 25);
+            this.uxQrCodeData.TabIndex = 8;
+            this.uxQrCodeData.Text = "";
+            this.uxQrCodeData.LinkClicked += new System.Windows.Forms.LinkClickedEventHandler(this.uxQrCodeData_LinkClicked);
+            // 
+            // uxOpenFileDialog
+            // 
+            this.uxOpenFileDialog.Multiselect = true;
+            // 
             // QrCodeDetectorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(584, 361);
-            this.Controls.Add(this.uxMemory);
-            this.Controls.Add(this.uxPicturePanel);
-            this.Controls.Add(this.uxValue);
-            this.Controls.Add(this.uxEnhance);
-            this.Controls.Add(this.uxQrCodeOutput);
-            this.Controls.Add(this.uxDataGrid);
+            this.ClientSize = new System.Drawing.Size(663, 438);
+            this.Controls.Add(this.uxOutput);
+            this.Controls.Add(this.uxStatusStrip);
+            this.Controls.Add(this.uxControlsGroup);
+            this.Controls.Add(this.uxHorizontalSplitContainer);
             this.Controls.Add(this.uxMenu);
             this.MainMenuStrip = this.uxMenu;
             this.MinimumSize = new System.Drawing.Size(600, 400);
             this.Name = "QrCodeDetectorForm";
             this.Text = "QR Code Detector";
-            ((System.ComponentModel.ISupportInitialize)(this.uxDataGrid)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.uxImageDisplay)).EndInit();
             this.uxMenu.ResumeLayout(false);
             this.uxMenu.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.uxFileSystemWatcher)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.uxValue)).EndInit();
-            this.uxPicturePanel.ResumeLayout(false);
-            this.uxPicturePanel.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.uxDataGrid)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.uxImageHolderBindingSource)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.uxImageDisplay)).EndInit();
+            this.uxHorizontalSplitContainer.Panel1.ResumeLayout(false);
+            this.uxHorizontalSplitContainer.Panel1.PerformLayout();
+            this.uxHorizontalSplitContainer.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.uxHorizontalSplitContainer)).EndInit();
+            this.uxHorizontalSplitContainer.ResumeLayout(false);
+            this.uxControlsGroup.ResumeLayout(false);
+            this.uxControlsGroup.PerformLayout();
+            this.uxAutoDetectControls.ResumeLayout(false);
+            this.uxAutoDetectControls.PerformLayout();
+            this.uxStatusStrip.ResumeLayout(false);
+            this.uxStatusStrip.PerformLayout();
+            this.uxOutput.ResumeLayout(false);
+            this.uxOutput.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -233,21 +428,36 @@
 
         #endregion
 
-        private System.Windows.Forms.DataGridView uxDataGrid;
-        private System.Windows.Forms.PictureBox uxImageDisplay;
         private System.Windows.Forms.MenuStrip uxMenu;
         private System.Windows.Forms.ToolStripMenuItem uxFileMenu;
-        private System.Windows.Forms.ToolStripMenuItem uxSetImageDirectory;
+        private System.Windows.Forms.ToolStripMenuItem uxSetImageWatchDirectoryMenuItem;
         private System.Windows.Forms.FolderBrowserDialog uxImageDirectoryBrowser;
         private System.Windows.Forms.BindingSource uxImageHolderBindingSource;
-        private System.Windows.Forms.DataGridViewTextBoxColumn filenameDataGridViewTextBoxColumn;
         private System.IO.FileSystemWatcher uxFileSystemWatcher;
-        private System.Windows.Forms.TextBox uxQrCodeOutput;
         private System.Windows.Forms.NumericUpDown uxValue;
         private System.Windows.Forms.Button uxEnhance;
-        private System.Windows.Forms.Panel uxPicturePanel;
-        private System.Windows.Forms.TextBox uxMemory;
         private System.Windows.Forms.Timer uxTimer;
+        private System.Windows.Forms.StatusStrip uxStatusStrip;
+        private System.Windows.Forms.ToolStripStatusLabel uxBytesUsed;
+        private System.Windows.Forms.GroupBox uxControlsGroup;
+        private System.Windows.Forms.SplitContainer uxHorizontalSplitContainer;
+        private System.Windows.Forms.PictureBox uxImageDisplay;
+        private System.Windows.Forms.DataGridView uxDataGrid;
+        private System.Windows.Forms.Label uxValueLabel;
+        private System.Windows.Forms.Label uxQrDataLabel;
+        private System.Windows.Forms.GroupBox uxOutput;
+        private System.Windows.Forms.CheckBox uxAutoAddImages;
+        private System.Windows.Forms.Button uxAddImages;
+        private System.Windows.Forms.Button uxSetImageWatchDirectory;
+        private System.Windows.Forms.GroupBox uxAutoDetectControls;
+        private System.Windows.Forms.RadioButton uxAutoDetectOnAdd;
+        private System.Windows.Forms.RadioButton uxAutoDetectOnView;
+        private System.Windows.Forms.RadioButton uxAutoDetectDisabled;
+        private System.Windows.Forms.ToolStripStatusLabel uxStatusLabel;
+        private System.Windows.Forms.OpenFileDialog uxOpenFileDialog;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Filename;
+        private System.Windows.Forms.DataGridViewTextBoxColumn QrCodeData;
+        private System.Windows.Forms.RichTextBox uxQrCodeData;
     }
 }
 

@@ -66,5 +66,21 @@ namespace QrCodeDetector
                 return value;
             }
         }
+
+        public static float BoundTo( float value, float lowerBound, float higherBound )
+        {
+            if( value < lowerBound )
+            {
+                return lowerBound;
+            }
+            else if( value > higherBound )
+            {
+                return higherBound;
+            }
+            else
+            {
+                return value;
+            }
+        }
     }
 }

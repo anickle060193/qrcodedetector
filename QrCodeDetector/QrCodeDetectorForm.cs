@@ -7,6 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -23,27 +24,19 @@ namespace QrCodeDetector
 {
     public partial class QrCodeDetectorForm : Form
     {
+        private static readonly int WATCH_DIRECTORY_DEPTH = 2;
         private static readonly int MIN_SUB_SIZE = 10;
-        private static readonly String[] IMAGE_EXTENSIONS = new String[] { ".png", ".jpg", ".jpeg" };
 
-        private static readonly Pen PEN = new Pen( Color.Blue, 2 );
+        private static readonly Pen QR_CODE_PEN = new Pen( Color.Blue, 2 );
         private static readonly SolidBrush SELECTION_BRUSH = new SolidBrush( Color.FromArgb( 175, Color.LimeGreen ) );
-        private static readonly Pen SELECTION_PEN = new Pen( Color.LimeGreen );
-        private static readonly Dictionary<DecodeHintType, Object> HINTS = new Dictionary<DecodeHintType, object>();
-        static QrCodeDetectorForm()
-        {
-            HINTS.Add( DecodeHintType.TRY_HARDER, true );
-            HINTS.Add( DecodeHintType.POSSIBLE_FORMATS, BarcodeFormat.QR_CODE );
-        }
+        private static readonly Pen SELECTION_PEN = new Pen( Color.LimeGreen, 2 );
+        private static readonly Pen QUADS_PEN = new Pen( Color.Red, 4 );
 
-        private List<List<IntPoint>> _corners = new List<List<IntPoint>>();
         private string _imageDirectory;
         private ImageHolder _currentImageHolder;
-        private Bitmap _currentImage;
-        private System.Drawing.Point[] _qrPoints;
         private bool _tracking;
-        private System.Drawing.Point _start;
-        private System.Drawing.Point _current;
+        private PointF _start;
+        private PointF _currentPoint;
 
         public QrCodeDetectorForm()
         {
@@ -67,28 +60,25 @@ namespace QrCodeDetector
 
         private void HandleDirectoryWatcherEvents( object sender, FileSystemEventArgs e )
         {
-            if( IMAGE_EXTENSIONS.Contains( Path.GetExtension( e.FullPath ) ) )
+            switch( e.ChangeType )
             {
-                switch( e.ChangeType )
-                {
-                    case WatcherChangeTypes.Created:
+                case WatcherChangeTypes.Created:
+                    InvokeOnDataGrid( (Action)delegate()
+                    {
+                        AddImage( e.FullPath );
+                    } );
+                    break;
+
+                case WatcherChangeTypes.Deleted:
+                    int index = FindImageHolderIndex( e.FullPath );
+                    if( index >= 0 )
+                    {
                         InvokeOnDataGrid( (Action)delegate()
                         {
-                            uxImageHolderBindingSource.Add( new ImageHolder( e.FullPath ) );
+                            uxImageHolderBindingSource.RemoveAt( index );
                         } );
-                        break;
-
-                    case WatcherChangeTypes.Deleted:
-                        int index = FindImageHolderIndex( e.FullPath );
-                        if( index >= 0 )
-                        {
-                            InvokeOnDataGrid( (Action)delegate()
-                            {
-                                uxImageHolderBindingSource.RemoveAt( index );
-                            } );
-                        }
-                        break;
-                }
+                    }
+                    break;
             }
         }
 
@@ -115,7 +105,6 @@ namespace QrCodeDetector
                     _tracking = false;
 
                     SetCurrentImage( (ImageHolder)uxImageHolderBindingSource.List[ index ] );
-                    DetectQrCode();
                 }
             }
         }
@@ -147,115 +136,101 @@ namespace QrCodeDetector
             }
 
             uxFileSystemWatcher.Path = _imageDirectory;
-            uxFileSystemWatcher.EnableRaisingEvents = true;
-
-            uxImageHolderBindingSource.Clear();
-            AddImages( new DirectoryInfo( _imageDirectory ) );
-        }
-
-        private void AddImages( DirectoryInfo dir )
-        {
-            IEnumerable<FileInfo> files = dir.GetFiles().Where( info => IMAGE_EXTENSIONS.Any( ext => info.Name.ToLower().EndsWith( ext ) ) );
-            foreach( FileInfo filename in files )
+            if( uxAutoAddImages.Checked )
             {
-                try
-                {
-                    ImageHolder im = new ImageHolder( filename.FullName );
-                    uxImageHolderBindingSource.Add( im );
-                }
-                catch { }
-            }
-            foreach( DirectoryInfo d in dir.GetDirectories() )
-            {
-                AddImages( d );
+                AddImagesFromDirectory( new DirectoryInfo( _imageDirectory ), WATCH_DIRECTORY_DEPTH );
             }
         }
 
         private void SetCurrentImage( ImageHolder holder )
         {
-            if( _currentImage != null )
-            {
-                _currentImage.Dispose();
-            }
             _currentImageHolder = holder;
-            _currentImage = holder.LoadImage();
-            _corners.Clear();
-            _qrPoints = null;
             _tracking = false;
-            uxImageDisplay.Image = _currentImage;
-        }
-
-        void uxImageDisplay_Paint( object sender, PaintEventArgs e )
-        {
-            Graphics g = e.Graphics;
-            if( _qrPoints != null )
+            if( uxImageDisplay.Image != null )
             {
-                g.DrawPolygon( PEN, _qrPoints );
+                uxImageDisplay.Image.Dispose();
             }
-            if( _tracking
-             && _start != System.Drawing.Point.Empty
-             && _current != System.Drawing.Point.Empty )
+            uxImageDisplay.Image = holder.LoadImage();
+            if( uxAutoDetectOnView.Checked )
             {
-                int x = Math.Min( _start.X, _current.X );
-                int y = Math.Min( _start.Y, _current.Y );
-                int width = Math.Abs( _current.X - _start.X );
-                int height = Math.Abs( _current.Y - _start.Y );
-                g.FillRectangle( SELECTION_BRUSH, x, y, width, height );
-                g.DrawRectangle( SELECTION_PEN, x, y, width, height );
-            }
-
-            foreach( List<IntPoint> cornerList in _corners )
-            {
-                System.Drawing.Point[] points = cornerList.ConvertAll( intPoint => new System.Drawing.Point( intPoint.X, intPoint.Y ) ).ToArray();
-                g.DrawPolygon( Pens.Red, points );
+                DetectQrCode( _currentImageHolder, true );
             }
         }
 
-        private void DetectQrCode()
+        private void AddImagesFromDirectory( DirectoryInfo directory, int directoryDepth )
         {
-            if( _currentImage == null )
+            if( directoryDepth > 0 )
             {
-                return;
+                foreach( FileInfo file in directory.GetFiles() )
+                {
+                    AddImage( file.FullName );
+                }
+                foreach( DirectoryInfo dir in directory.GetDirectories() )
+                {
+                    AddImagesFromDirectory( dir, directoryDepth - 1 );
+                }
             }
+        }
+
+        private void DetectQrCode( ImageHolder imageHolder, bool displayResults )
+        {
             try
             {
-                LuminanceSource source = new BitmapLuminanceSource( _currentImage );
-                Binarizer binarizer = new HybridBinarizer( source );
-                BinaryBitmap binBitmap = new BinaryBitmap( binarizer );
-                QRCodeReader reader = new QRCodeReader();
-                Result result = reader.decode( binBitmap, HINTS );
-
-                if( result != null )
-                {
-                    _qrPoints = result.ResultPoints.ToList().ConvertAll( point => new System.Drawing.Point( (int)point.X, (int)point.Y ) ).ToArray();
-                    uxImageDisplay.Invalidate();
-
-                    uxQrCodeOutput.Text = result.Text;
-                }
-                else
-                {
-                    uxQrCodeOutput.Text = "No QR codes detected.";
-                    _qrPoints = null;
-                }
+                imageHolder.DetectQrCode();
+                uxDataGrid.Invalidate();
             }
             catch( Exception ex )
             {
-                _qrPoints = null;
-                MessageBox.Show( "The following error occured:\n" + ex.ToString() );
+                Error( "An error occured while detecting QR codes.", ex );
+            }
+            if( displayResults )
+            {
+                uxQrCodeData.Text = _currentImageHolder.QrCodeData;
+                uxImageDisplay.Invalidate();
+            }
+        }
+
+        private void uxImageDisplay_Paint( object sender, PaintEventArgs e )
+        {
+            if( _currentImageHolder != null )
+            {
+                Graphics g = e.Graphics;
+                if( _currentImageHolder.QrCodePoints != null )
+                {
+                    PointF[] points = _currentImageHolder.QrCodePoints.ToList().ConvertAll( rp => new PointF( rp.X, rp.Y ) ).ToArray();
+                    g.DrawPolygon( QR_CODE_PEN, points );
+                }
+                if( _tracking
+                 && _start != PointF.Empty
+                 && _currentPoint != PointF.Empty )
+                {
+                    float x = Math.Min( _start.X, _currentPoint.X );
+                    float y = Math.Min( _start.Y, _currentPoint.Y );
+                    float width = Math.Abs( _currentPoint.X - _start.X );
+                    float height = Math.Abs( _currentPoint.Y - _start.Y );
+                    g.FillRectangle( SELECTION_BRUSH, x, y, width, height );
+                    g.DrawRectangle( SELECTION_PEN, x, y, width, height );
+                }
+
+                foreach( List<IntPoint> cornerList in _currentImageHolder.Corners )
+                {
+                    PointF[] points = cornerList.ConvertAll( intPoint => new PointF( intPoint.X, intPoint.Y ) ).ToArray();
+                    g.DrawPolygon( QUADS_PEN, points );
+                }
             }
         }
 
         private void uxImageDisplay_MouseDown( object sender, MouseEventArgs e )
         {
-            _tracking = _currentImage != null;
-            _start = new System.Drawing.Point( e.X, e.Y );
+            _tracking = _currentImageHolder != null;
+            _start = new PointF( e.X, e.Y );
         }
 
         private void uxImageDisplay_MouseMove( object sender, MouseEventArgs e )
         {
             if( _tracking )
             {
-                _current = new System.Drawing.Point( e.X, e.Y );
+                _currentPoint = new PointF( e.X, e.Y );
                 uxImageDisplay.Invalidate();
             }
         }
@@ -266,56 +241,58 @@ namespace QrCodeDetector
             {
                 _tracking = false;
 
-                _current = new System.Drawing.Point( e.X, e.Y );
-                Bitmap image = _currentImage;
-                int x = Utitlies.BoundTo( _start.X, 0, image.Width );
-                int y = Utitlies.BoundTo( _start.Y, 0, image.Height );
-                int width = Utitlies.BoundTo( Math.Abs( x - _current.X ), 0, image.Width - x );
-                int height = Utitlies.BoundTo( Math.Abs( y - _current.Y ), 0, image.Height - y );
-
-                if( width >= MIN_SUB_SIZE && height >= MIN_SUB_SIZE )
+                _currentPoint = new PointF( e.X, e.Y );
+                using( Bitmap image = _currentImageHolder.LoadImage() )
                 {
-                    try
+                    int x = (int)Utitlies.BoundTo( _start.X, 0, image.Width );
+                    int y = (int)Utitlies.BoundTo( _start.Y, 0, image.Height );
+                    int width = (int)Utitlies.BoundTo( Math.Abs( x - _currentPoint.X ), 0, image.Width - x );
+                    int height = (int)Utitlies.BoundTo( Math.Abs( y - _currentPoint.Y ), 0, image.Height - y );
+
+                    if( width >= MIN_SUB_SIZE && height >= MIN_SUB_SIZE )
                     {
-                        using( Bitmap bitmap = ImageManipulation.SubImage( image, new Rectangle( x, y, width, height ) ) )
+                        try
                         {
-                            string fullFilename = _currentImageHolder.FullFilename;
-                            string directory = Path.GetDirectoryName( fullFilename );
-                            string filename = Path.GetFileNameWithoutExtension( fullFilename );
-                            string extension = Path.GetExtension( fullFilename );
-                            string now = DateTime.Now.ToString( "hh-mm-ss_MM-dd-yyy" );
-                            string newFilename = directory + Path.DirectorySeparatorChar + "sub" + Path.DirectorySeparatorChar + now + "_" + filename + extension;
-                            string newDirectoryName = Path.GetDirectoryName( newFilename );
-                            if( !Directory.Exists( newDirectoryName ) )
+                            using( Bitmap bitmap = ImageManipulation.SubImage( image, new Rectangle( x, y, width, height ) ) )
                             {
-                                Directory.CreateDirectory( newDirectoryName );
-                            }
-                            if( !Utitlies.HasWritePermissionOnDir( newDirectoryName ) )
-                            {
-                                MessageBox.Show( "You do not have access to write this file: " + newFilename );
-                            }
-                            else
-                            {
-                                bitmap.Save( newFilename );
+                                string fullFilename = _currentImageHolder.FullFilename;
+                                string directory = Path.GetDirectoryName( fullFilename );
+                                string filename = Path.GetFileNameWithoutExtension( fullFilename );
+                                string extension = Path.GetExtension( fullFilename );
+                                string now = DateTime.Now.ToString( "hh-mm-ss_MM-dd-yyy" );
+                                string newFilename = directory + Path.DirectorySeparatorChar + "sub" + Path.DirectorySeparatorChar + now + "_" + filename + extension;
+                                string newDirectoryName = Path.GetDirectoryName( newFilename );
+                                if( !Directory.Exists( newDirectoryName ) )
+                                {
+                                    Directory.CreateDirectory( newDirectoryName );
+                                }
+                                if( !Utitlies.HasWritePermissionOnDir( newDirectoryName ) )
+                                {
+                                    Error( "You do not have access to write this file: " + newFilename, null );
+                                }
+                                else
+                                {
+                                    bitmap.Save( newFilename );
+                                }
                             }
                         }
-                    }
-                    catch( OutOfMemoryException ex )
-                    {
-                        MessageBox.Show( "We failed...sorry\n" + ex.ToString() );
-                    }
-                    catch( Exception ex )
-                    {
-                        MessageBox.Show( "The image could not be saved.\n" + ex.ToString() );
+                        catch( OutOfMemoryException ex )
+                        {
+                            Error( "We failed...sorry", ex );
+                        }
+                        catch( Exception ex )
+                        {
+                            MessageBox.Show( "The image could not be saved." + ex.ToString() );
+                        }
                     }
                 }
             }
-
             uxImageDisplay.Invalidate();
         }
 
         private void uxImageDisplay_PreviewKeyDown( object sender, PreviewKeyDownEventArgs e )
         {
+            //TODO Still not working
             switch( e.KeyCode )
             {
                 case Keys.Escape:
@@ -341,7 +318,7 @@ namespace QrCodeDetector
                         }
                         catch( Exception ex )
                         {
-                            MessageBox.Show( "Could not delete selected image:\n" + ex.ToString() );
+                            Error( "Could not delete selected image.", ex );
                         }
                         row = Math.Min( row - 1, uxImageHolderBindingSource.Count - 1 );
                         if( 0 <= row && row < uxImageHolderBindingSource.Count )
@@ -355,76 +332,79 @@ namespace QrCodeDetector
 
         private void uxEnhance_Click( object sender, EventArgs e )
         {
-            if( _currentImage != null )
+            if( _currentImageHolder != null )
             {
-                UnmanagedImage image, grayImage, edgesImage;
-
-                Bitmap newBitmap = new Bitmap( _currentImage );
-                Rectangle rect = new Rectangle( 0, 0, newBitmap.Width, newBitmap.Height );
-                image = new UnmanagedImage( newBitmap.LockBits( rect, ImageLockMode.ReadWrite, _currentImage.PixelFormat ) );
-
-                if( _currentImage.PixelFormat == PixelFormat.Format8bppIndexed )
-                {
-                    grayImage = image;
-                }
-                else
-                {
-                    grayImage = UnmanagedImage.Create( image.Width, image.Height, PixelFormat.Format8bppIndexed );
-                    Grayscale.CommonAlgorithms.BT709.Apply( image, grayImage );
-                }
-                
-                DifferenceEdgeDetector edgeDetector = new DifferenceEdgeDetector();
-                edgesImage = edgeDetector.Apply( grayImage );
-
-                Threshold thresholdFilter = new Threshold( (int)uxValue.Value );
-                thresholdFilter.ApplyInPlace( edgesImage );
-
-                BlobCounter blobCounter = new BlobCounter();
-                blobCounter.MinHeight = 10;
-                blobCounter.MinHeight = 10;
-                blobCounter.FilterBlobs = true;
-                blobCounter.ObjectsOrder = ObjectsOrder.Size;
-
-                blobCounter.ProcessImage( edgesImage );
-                Blob[] blobs = blobCounter.GetObjectsInformation();
-
-                _corners.Clear();
-                foreach( Blob blob in blobs )
-                {
-                    List<IntPoint> edgePoints = blobCounter.GetBlobsEdgePoints( blob );
-                    List<IntPoint> corners = null;
-
-                    SimpleShapeChecker shapeChecker = new SimpleShapeChecker();
-                    
-                    if( shapeChecker.IsQuadrilateral( edgePoints, out corners ) )
-                    {
-                        List<IntPoint> leftEdgePoints, rightEdgePoints;
-                        blobCounter.GetBlobsLeftAndRightEdges( blob, out leftEdgePoints, out rightEdgePoints );
-
-                        float diff = ImageManipulation.CalculateAvgEdgeBrightnessDiff( leftEdgePoints, rightEdgePoints, grayImage );
-
-                        if( diff > 20 )
-                        {
-                            _corners.Add( corners );
-                        }
-                    }
-                }
-
+                _currentImageHolder.RunEdgeDetection( (int)uxValue.Value );
                 uxImageDisplay.Invalidate();
-
-                foreach( IDisposable disposable in new IDisposable[] { newBitmap, image, grayImage, edgesImage } )
-                {
-                    if( disposable != null )
-                    {
-                        disposable.Dispose();
-                    }
-                }
             }
         }
 
         private void uxTimer_Tick( object sender, EventArgs e )
         {
-            uxMemory.Text = String.Format( "{0:n0}", GC.GetTotalMemory( false ) ) + " Bytes";
+            uxBytesUsed.Text = String.Format( "{0:n0}", GC.GetTotalMemory( false ) ) + " Bytes Used";
+        }
+
+        private void uxAutoAddImages_CheckedChanged( object sender, EventArgs e )
+        {
+            uxFileSystemWatcher.EnableRaisingEvents = uxAutoAddImages.Checked;
+        }
+
+        private void Error( String message, Exception ex )
+        {
+            uxStatusLabel.Text = message;
+            if( ex != null )
+            {
+                uxStatusLabel.Tag = ex;
+            }
+        }
+
+        private void AddImage( string filename )
+        {
+            if( FindImageHolderIndex( filename ) < 0 )
+            {
+                try
+                {
+                    ImageHolder im = new ImageHolder( filename );
+                    uxImageHolderBindingSource.Add( im );
+                    if( uxAutoDetectOnAdd.Checked )
+                    {
+                        DetectQrCode( im, false );
+                    }
+                }
+                catch( Exception ex )
+                {
+                    Error( "The given image could not be added: " + filename, ex );
+                }
+            }
+        }
+
+        private void uxAddImages_Click( object sender, EventArgs e )
+        {
+            if( uxOpenFileDialog.ShowDialog() == DialogResult.OK )
+            {
+                foreach( String filename in uxOpenFileDialog.FileNames )
+                {
+                    AddImage( filename );
+                }
+            }
+        }
+
+        private void uxQrCodeData_LinkClicked( object sender, LinkClickedEventArgs e )
+        {
+            Process.Start( e.LinkText );
+        }
+
+        private void uxStatusLabel_Click( object sender, EventArgs e )
+        {
+            Exception ex = uxStatusLabel.Tag as Exception;
+            if( ex != null )
+            {
+                string exception = ex.ToString();
+                Clipboard.SetText( exception, TextDataFormat.Text );
+                MessageBox.Show( exception );
+            }
+            uxStatusLabel.Text = "";
+            uxStatusLabel.Tag = null;
         }
     }
 }
