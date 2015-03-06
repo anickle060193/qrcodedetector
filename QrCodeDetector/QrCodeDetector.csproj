@@ -74,6 +74,7 @@
     </Compile>
     <Compile Include="ImageHolder.cs" />
     <Compile Include="ImageManipulation.cs" />
+    <Compile Include="Log.cs" />
     <Compile Include="QrCodeDetectorForm.cs">
       <SubType>Form</SubType>
     </Compile>
