@@ -40,7 +40,7 @@ namespace QrCodeDetector
         private string _imageDirectory;
         private ImageHolder _currentImageHolder;
         private Bitmap _currentImage;
-        private PointF[] _qrPoints;
+        private System.Drawing.Point[] _qrPoints;
         private bool _tracking;
         private System.Drawing.Point _start;
         private System.Drawing.Point _current;
@@ -67,25 +67,28 @@ namespace QrCodeDetector
 
         private void HandleDirectoryWatcherEvents( object sender, FileSystemEventArgs e )
         {
-            switch( e.ChangeType )
+            if( IMAGE_EXTENSIONS.Contains( Path.GetExtension( e.FullPath ) ) )
             {
-                case WatcherChangeTypes.Created:
-                    InvokeOnDataGrid( (Action)delegate()
-                    {
-                        uxImageHolderBindingSource.Add( new ImageHolder( e.FullPath ) );
-                    } );
-                    break;
-
-                case WatcherChangeTypes.Deleted:
-                    int index = FindImageHolderIndex( e.FullPath );
-                    if( index >= 0 )
-                    {
+                switch( e.ChangeType )
+                {
+                    case WatcherChangeTypes.Created:
                         InvokeOnDataGrid( (Action)delegate()
                         {
-                            uxImageHolderBindingSource.RemoveAt( index );
+                            uxImageHolderBindingSource.Add( new ImageHolder( e.FullPath ) );
                         } );
-                    }
-                    break;
+                        break;
+
+                    case WatcherChangeTypes.Deleted:
+                        int index = FindImageHolderIndex( e.FullPath );
+                        if( index >= 0 )
+                        {
+                            InvokeOnDataGrid( (Action)delegate()
+                            {
+                                uxImageHolderBindingSource.RemoveAt( index );
+                            } );
+                        }
+                        break;
+                }
             }
         }
 
@@ -111,13 +114,7 @@ namespace QrCodeDetector
                 {
                     _tracking = false;
 
-                    _currentImageHolder = (ImageHolder)uxImageHolderBindingSource.List[ index ];
-                    if( _currentImage != null )
-                    {
-                        _currentImage.Dispose();
-                    }
-                    _currentImage =_currentImageHolder.LoadImage();
-                    uxImageDisplay.Image = _currentImage;
+                    SetCurrentImage( (ImageHolder)uxImageHolderBindingSource.List[ index ] );
                     DetectQrCode();
                 }
             }
@@ -174,6 +171,20 @@ namespace QrCodeDetector
             }
         }
 
+        private void SetCurrentImage( ImageHolder holder )
+        {
+            if( _currentImage != null )
+            {
+                _currentImage.Dispose();
+            }
+            _currentImageHolder = holder;
+            _currentImage = holder.LoadImage();
+            _corners.Clear();
+            _qrPoints = null;
+            _tracking = false;
+            uxImageDisplay.Image = _currentImage;
+        }
+
         void uxImageDisplay_Paint( object sender, PaintEventArgs e )
         {
             Graphics g = e.Graphics;
@@ -216,15 +227,7 @@ namespace QrCodeDetector
 
                 if( result != null )
                 {
-                    ResultPoint[] points = result.ResultPoints;
-                    _qrPoints = new PointF[ points.Length ];
-                    for( int i = 0; i < points.Length; i++ )
-                    {
-                        if( points[ i ] != null )
-                        {
-                            _qrPoints[ i ] = new PointF( points[ i ].X, points[ i ].Y );
-                        }
-                    }
+                    _qrPoints = result.ResultPoints.ToList().ConvertAll( point => new System.Drawing.Point( (int)point.X, (int)point.Y ) ).ToArray();
                     uxImageDisplay.Invalidate();
 
                     uxQrCodeOutput.Text = result.Text;
@@ -264,45 +267,46 @@ namespace QrCodeDetector
                 _tracking = false;
 
                 _current = new System.Drawing.Point( e.X, e.Y );
-                using( Bitmap image = _currentImage )
-                {
-                    int x = Math.Max( 0, Math.Min( _start.X, _current.X ) );
-                    int y = Math.Max( 0, Math.Min( _start.Y, _current.Y ) );
-                    int width = Math.Min( Math.Abs( _current.X - _start.X ), image.Width - x );
-                    int height = Math.Min( Math.Abs( _current.Y - _start.Y ), image.Height - y );
+                Bitmap image = _currentImage;
+                int x = Utitlies.BoundTo( _start.X, 0, image.Width );
+                int y = Utitlies.BoundTo( _start.Y, 0, image.Height );
+                int width = Utitlies.BoundTo( Math.Abs( x - _current.X ), 0, image.Width - x );
+                int height = Utitlies.BoundTo( Math.Abs( y - _current.Y ), 0, image.Height - y );
 
-                    if( width >= MIN_SUB_SIZE && height >= MIN_SUB_SIZE )
+                if( width >= MIN_SUB_SIZE && height >= MIN_SUB_SIZE )
+                {
+                    try
                     {
-                        Rectangle rect = new Rectangle( x, y, width, height );
-                        using( Bitmap bitmap = image.Clone( rect, image.PixelFormat ) )
+                        using( Bitmap bitmap = ImageManipulation.SubImage( image, new Rectangle( x, y, width, height ) ) )
                         {
-                            try
+                            string fullFilename = _currentImageHolder.FullFilename;
+                            string directory = Path.GetDirectoryName( fullFilename );
+                            string filename = Path.GetFileNameWithoutExtension( fullFilename );
+                            string extension = Path.GetExtension( fullFilename );
+                            string now = DateTime.Now.ToString( "hh-mm-ss_MM-dd-yyy" );
+                            string newFilename = directory + Path.DirectorySeparatorChar + "sub" + Path.DirectorySeparatorChar + now + "_" + filename + extension;
+                            string newDirectoryName = Path.GetDirectoryName( newFilename );
+                            if( !Directory.Exists( newDirectoryName ) )
                             {
-                                string fullFilename = _currentImageHolder.FullFilename;
-                                string directory = Path.GetDirectoryName( fullFilename );
-                                string filename = Path.GetFileNameWithoutExtension( fullFilename );
-                                string extension = Path.GetExtension( fullFilename );
-                                string now = DateTime.Now.ToString( "hh-mm-ss_MM-dd-yyy" );
-                                string newFilename = directory + Path.DirectorySeparatorChar + "sub" + Path.DirectorySeparatorChar + now + "_" + filename + extension;
-                                string newDirectoryName = Path.GetDirectoryName( newFilename );
-                                if( !Directory.Exists( newDirectoryName ) )
-                                {
-                                    Directory.CreateDirectory( newDirectoryName );
-                                }
-                                if( !Utitlies.HasWritePermissionOnDir( newDirectoryName ) )
-                                {
-                                    MessageBox.Show( "You do not have access to write this file: " + newFilename );
-                                }
-                                else
-                                {
-                                    bitmap.Save( newFilename );
-                                }
+                                Directory.CreateDirectory( newDirectoryName );
                             }
-                            catch( Exception ex )
+                            if( !Utitlies.HasWritePermissionOnDir( newDirectoryName ) )
                             {
-                                MessageBox.Show( "The image could not be saved.\n" + ex.ToString() );
+                                MessageBox.Show( "You do not have access to write this file: " + newFilename );
+                            }
+                            else
+                            {
+                                bitmap.Save( newFilename );
                             }
                         }
+                    }
+                    catch( OutOfMemoryException ex )
+                    {
+                        MessageBox.Show( "We failed...sorry\n" + ex.ToString() );
+                    }
+                    catch( Exception ex )
+                    {
+                        MessageBox.Show( "The image could not be saved.\n" + ex.ToString() );
                     }
                 }
             }
@@ -353,11 +357,12 @@ namespace QrCodeDetector
         {
             if( _currentImage != null )
             {
+                UnmanagedImage image, grayImage, edgesImage;
+
                 Bitmap newBitmap = new Bitmap( _currentImage );
                 Rectangle rect = new Rectangle( 0, 0, newBitmap.Width, newBitmap.Height );
-                UnmanagedImage image = new UnmanagedImage( newBitmap.LockBits( rect, ImageLockMode.ReadWrite, _currentImage.PixelFormat ) );
+                image = new UnmanagedImage( newBitmap.LockBits( rect, ImageLockMode.ReadWrite, _currentImage.PixelFormat ) );
 
-                UnmanagedImage grayImage = null;
                 if( _currentImage.PixelFormat == PixelFormat.Format8bppIndexed )
                 {
                     grayImage = image;
@@ -367,14 +372,12 @@ namespace QrCodeDetector
                     grayImage = UnmanagedImage.Create( image.Width, image.Height, PixelFormat.Format8bppIndexed );
                     Grayscale.CommonAlgorithms.BT709.Apply( image, grayImage );
                 }
-
+                
                 DifferenceEdgeDetector edgeDetector = new DifferenceEdgeDetector();
-                UnmanagedImage edgesImage = edgeDetector.Apply( grayImage );
+                edgesImage = edgeDetector.Apply( grayImage );
 
-                Threshold thresholdFilter = new Threshold( 40 ); //(int)uxValue.Value );
+                Threshold thresholdFilter = new Threshold( (int)uxValue.Value );
                 thresholdFilter.ApplyInPlace( edgesImage );
-
-                new ImageForm( "Edges", edgesImage.ToManagedImage() ).Show();
 
                 BlobCounter blobCounter = new BlobCounter();
                 blobCounter.MinHeight = 10;
@@ -398,7 +401,7 @@ namespace QrCodeDetector
                         List<IntPoint> leftEdgePoints, rightEdgePoints;
                         blobCounter.GetBlobsLeftAndRightEdges( blob, out leftEdgePoints, out rightEdgePoints );
 
-                        float diff = CalculateAverageEdgesBrightnessDifference( leftEdgePoints, rightEdgePoints, grayImage );
+                        float diff = ImageManipulation.CalculateAvgEdgeBrightnessDiff( leftEdgePoints, rightEdgePoints, grayImage );
 
                         if( diff > 20 )
                         {
@@ -408,70 +411,20 @@ namespace QrCodeDetector
                 }
 
                 uxImageDisplay.Invalidate();
+
+                foreach( IDisposable disposable in new IDisposable[] { newBitmap, image, grayImage, edgesImage } )
+                {
+                    if( disposable != null )
+                    {
+                        disposable.Dispose();
+                    }
+                }
             }
         }
 
-        // Calculate average brightness difference between pixels outside and
-        // inside of the object bounded by specified left and right edge
-        private float CalculateAverageEdgesBrightnessDifference(
-            List<IntPoint> leftEdgePoints,
-            List<IntPoint> rightEdgePoints,
-            UnmanagedImage image )
+        private void uxTimer_Tick( object sender, EventArgs e )
         {
-            const int stepSize = 3;
-            
-            // create list of points, which are a bit on the left/right from edges
-            List<IntPoint> leftEdgePoints1 = new List<IntPoint>();
-            List<IntPoint> leftEdgePoints2 = new List<IntPoint>();
-            List<IntPoint> rightEdgePoints1 = new List<IntPoint>();
-            List<IntPoint> rightEdgePoints2 = new List<IntPoint>();
-
-            int tx1, tx2, ty;
-            int widthM1 = image.Width - 1;
-
-            for( int k = 0; k < leftEdgePoints.Count; k++ )
-            {
-                tx1 = leftEdgePoints[ k ].X - stepSize;
-                tx2 = leftEdgePoints[ k ].X + stepSize;
-                ty = leftEdgePoints[ k ].Y;
-
-                leftEdgePoints1.Add( new IntPoint(
-                    ( tx1 < 0 ) ? 0 : tx1, ty ) );
-                leftEdgePoints2.Add( new IntPoint(
-                    ( tx2 > widthM1 ) ? widthM1 : tx2, ty ) );
-
-                tx1 = rightEdgePoints[ k ].X - stepSize;
-                tx2 = rightEdgePoints[ k ].X + stepSize;
-                ty = rightEdgePoints[ k ].Y;
-
-                rightEdgePoints1.Add( new IntPoint(
-                    ( tx1 < 0 ) ? 0 : tx1, ty ) );
-                rightEdgePoints2.Add( new IntPoint(
-                    ( tx2 > widthM1 ) ? widthM1 : tx2, ty ) );
-            }
-
-            // collect pixel values from specified points
-            byte[] leftValues1 = image.Collect8bppPixelValues( leftEdgePoints1 );
-            byte[] leftValues2 = image.Collect8bppPixelValues( leftEdgePoints2 );
-            byte[] rightValues1 = image.Collect8bppPixelValues( rightEdgePoints1 );
-            byte[] rightValues2 = image.Collect8bppPixelValues( rightEdgePoints2 );
-
-            // calculate average difference between pixel values from outside of
-            // the shape and from inside
-            float diff = 0;
-            int pixelCount = 0;
-
-            for( int k = 0; k < leftEdgePoints.Count; k++ )
-            {
-                if( rightEdgePoints[ k ].X - leftEdgePoints[ k ].X > stepSize * 2 )
-                {
-                    diff += ( leftValues1[ k ] - leftValues2[ k ] );
-                    diff += ( rightValues2[ k ] - rightValues1[ k ] );
-                    pixelCount += 2;
-                }
-            }
-
-            return diff / pixelCount;
+            uxMemory.Text = String.Format( "{0:n0}", GC.GetTotalMemory( false ) ) + " Bytes";
         }
     }
 }

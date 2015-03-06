@@ -40,6 +40,8 @@
             this.uxEnhance = new System.Windows.Forms.Button();
             this.uxValue = new System.Windows.Forms.NumericUpDown();
             this.uxPicturePanel = new System.Windows.Forms.Panel();
+            this.uxMemory = new System.Windows.Forms.TextBox();
+            this.uxTimer = new System.Windows.Forms.Timer(this.components);
             this.filenameDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.uxImageHolderBindingSource = new System.Windows.Forms.BindingSource(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.uxDataGrid)).BeginInit();
@@ -65,12 +67,12 @@
             this.uxDataGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.filenameDataGridViewTextBoxColumn});
             this.uxDataGrid.DataSource = this.uxImageHolderBindingSource;
-            this.uxDataGrid.Location = new System.Drawing.Point(12, 83);
+            this.uxDataGrid.Location = new System.Drawing.Point(12, 108);
             this.uxDataGrid.MultiSelect = false;
             this.uxDataGrid.Name = "uxDataGrid";
             this.uxDataGrid.ReadOnly = true;
             this.uxDataGrid.RowHeadersVisible = false;
-            this.uxDataGrid.Size = new System.Drawing.Size(240, 266);
+            this.uxDataGrid.Size = new System.Drawing.Size(240, 241);
             this.uxDataGrid.TabIndex = 0;
             this.uxDataGrid.CurrentCellChanged += new System.EventHandler(this.uxDataGrid_CurrentCellChanged);
             this.uxDataGrid.KeyUp += new System.Windows.Forms.KeyEventHandler(this.uxDataGrid_KeyUp);
@@ -139,17 +141,27 @@
             this.uxEnhance.UseVisualStyleBackColor = true;
             this.uxEnhance.Click += new System.EventHandler(this.uxEnhance_Click);
             // 
-            // uxConstrast
+            // uxValue
             // 
+            this.uxValue.Increment = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
             this.uxValue.Location = new System.Drawing.Point(180, 56);
             this.uxValue.Minimum = new decimal(new int[] {
             100,
             0,
             0,
             -2147483648});
-            this.uxValue.Name = "uxConstrast";
+            this.uxValue.Name = "uxValue";
             this.uxValue.Size = new System.Drawing.Size(72, 20);
             this.uxValue.TabIndex = 5;
+            this.uxValue.Value = new decimal(new int[] {
+            40,
+            0,
+            0,
+            0});
             // 
             // uxPicturePanel
             // 
@@ -162,6 +174,21 @@
             this.uxPicturePanel.Name = "uxPicturePanel";
             this.uxPicturePanel.Size = new System.Drawing.Size(314, 322);
             this.uxPicturePanel.TabIndex = 6;
+            // 
+            // uxMemory
+            // 
+            this.uxMemory.Location = new System.Drawing.Point(12, 82);
+            this.uxMemory.Name = "uxMemory";
+            this.uxMemory.ReadOnly = true;
+            this.uxMemory.Size = new System.Drawing.Size(240, 20);
+            this.uxMemory.TabIndex = 7;
+            this.uxMemory.Text = "0 Bytes";
+            this.uxMemory.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
+            // uxTimer
+            // 
+            this.uxTimer.Enabled = true;
+            this.uxTimer.Tick += new System.EventHandler(this.uxTimer_Tick);
             // 
             // filenameDataGridViewTextBoxColumn
             // 
@@ -179,6 +206,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(584, 361);
+            this.Controls.Add(this.uxMemory);
             this.Controls.Add(this.uxPicturePanel);
             this.Controls.Add(this.uxValue);
             this.Controls.Add(this.uxEnhance);
@@ -218,6 +246,8 @@
         private System.Windows.Forms.NumericUpDown uxValue;
         private System.Windows.Forms.Button uxEnhance;
         private System.Windows.Forms.Panel uxPicturePanel;
+        private System.Windows.Forms.TextBox uxMemory;
+        private System.Windows.Forms.Timer uxTimer;
     }
 }
 

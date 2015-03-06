@@ -29,10 +29,7 @@ namespace QrCodeDetector
         {
             if( File.Exists( FullFilename ) )
             {
-                using( FileStream input = File.Open( FullFilename, FileMode.Open, FileAccess.Read ) )
-                {
-                    return new Bitmap( input );
-                }
+                return (Bitmap)Bitmap.FromFile( FullFilename );
             }
             else
             {
