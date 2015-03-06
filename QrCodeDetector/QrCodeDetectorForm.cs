@@ -42,8 +42,6 @@ namespace QrCodeDetector
         {
             InitializeComponent();
 
-            uxFileSystemWatcher.EnableRaisingEvents = false;
-            uxFileSystemWatcher.Filter = "*.png";
             uxFileSystemWatcher.Deleted += HandleDirectoryWatcherEvents;
             uxFileSystemWatcher.Created += HandleDirectoryWatcherEvents;
 
@@ -334,8 +332,15 @@ namespace QrCodeDetector
         {
             if( _currentImageHolder != null )
             {
-                _currentImageHolder.RunEdgeDetection( (int)uxValue.Value );
-                uxImageDisplay.Invalidate();
+                try
+                {
+                    _currentImageHolder.RunEdgeDetection( (int)uxValue.Value );
+                    uxImageDisplay.Invalidate();
+                }
+                catch( Exception ex )
+                {
+                    Error( "An error occured while detecting edges.", ex );
+                }
             }
         }
 

@@ -11,7 +11,7 @@ namespace QrCodeDetector
     {
         private static string _logFilename;
 
-        public void Init( string filename )
+        public static void Init( string filename )
         {
             _logFilename = filename;
         }
