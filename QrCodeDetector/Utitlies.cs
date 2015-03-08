@@ -45,7 +45,7 @@ namespace QrCodeDetector
                 }
                 return writeAllow && !writeDeny;
             }
-            catch( Exception ex )
+            catch
             {
                 return false;
             }

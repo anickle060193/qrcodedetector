@@ -82,5 +82,29 @@ namespace QrCodeDetector.Properties {
                 this["QrCodeDetectorFormHeight"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AutoAddFromWatchDirectory {
+            get {
+                return ((bool)(this["AutoAddFromWatchDirectory"]));
+            }
+            set {
+                this["AutoAddFromWatchDirectory"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("OnAdd")]
+        public global::QrCodeDetector.QrCodeDetectorForm.AutoDetectOptions AutoDetectOption {
+            get {
+                return ((global::QrCodeDetector.QrCodeDetectorForm.AutoDetectOptions)(this["AutoDetectOption"]));
+            }
+            set {
+                this["AutoDetectOption"] = value;
+            }
+        }
     }
 }

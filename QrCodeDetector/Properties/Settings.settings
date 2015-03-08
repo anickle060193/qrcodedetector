@@ -17,5 +17,11 @@
     <Setting Name="QrCodeDetectorFormHeight" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
+    <Setting Name="AutoAddFromWatchDirectory" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="AutoDetectOption" Type="QrCodeDetector.QrCodeDetectorForm.AutoDetectOptions" Scope="User">
+      <Value Profile="(Default)">OnAdd</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

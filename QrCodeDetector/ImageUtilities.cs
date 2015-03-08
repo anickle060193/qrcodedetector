@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace QrCodeDetector
 {
-    public static class ImageManipulation
+    public static class ImageUtilities
     {
         // Calculate average brightness difference between pixels outside and
         // inside of the object bounded by specified left and right edge

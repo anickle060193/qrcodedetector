@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,16 +10,25 @@ namespace QrCodeDetector
 {
     public static class Log
     {
+        private static readonly string LOG_FILENAME_FORMAT = "log-{0}.txt";
         private static string _logFilename;
+        private static bool _initialized;
 
-        public static void Init( string filename )
+        public static void Init()
         {
-            _logFilename = filename;
+            int i = 0;
+            while( File.Exists( String.Format( LOG_FILENAME_FORMAT, i ) ) )
+            {
+                i++;
+            }
+            _logFilename = String.Format( LOG_FILENAME_FORMAT, i );
+            _initialized = true;
+            File.Create( _logFilename ).Close();
         }
 
         private static void VerifyInitialized()
         {
-            if( !File.Exists( _logFilename ) )
+            if( !_initialized )
             {
                 throw new InvalidOperationException( "Log has not been initialized. See Log.Init()" );
             }
@@ -30,32 +40,27 @@ namespace QrCodeDetector
             return new StreamWriter( _logFilename, true );
         }
 
-        private static void WriteDateTimeTag( string tag, StreamWriter writer )
+        private static void WriteDateTimeMemberNameLine( string memberName, int sourceLineNumber, StreamWriter writer )
         {
-            DateTime now = DateTime.Now;
-            writer.Write( now.ToLongDateString() );
-            writer.Write( " " );
-            writer.Write( now.ToLongTimeString() );
-            writer.Write( ": " );
-            writer.Write( tag );
-            writer.Write( " - " );
+            writer.Write( DateTime.Now.ToString( "[ MM/dd/yyyy hh:mm.ss ] : " ) + memberName + " line: " + sourceLineNumber.ToString() + " - " );
         }
 
-        public static void Write( string tag, string output )
+        public static void Write( string output, [CallerMemberName]string memberName = "MemberName", [CallerLineNumber] int sourceLineNumber = 0 )
         {
             using( StreamWriter writer = CreateWriter() )
             {
-                WriteDateTimeTag( tag, writer );
-                writer.Write( output );
+                WriteDateTimeMemberNameLine( memberName, sourceLineNumber, writer );
+                writer.WriteLine( output );
             }
         }
 
-        public static void Write( string tag, Exception ex )
+        public static void Write( string output, Exception ex, [CallerMemberName]string memberName = "MemberName", [CallerLineNumber] int sourceLineNumber = 0 )
         {
             using( StreamWriter writer = CreateWriter() )
             {
-                WriteDateTimeTag( tag, writer );
-                writer.Write( ex.ToString() );
+                WriteDateTimeMemberNameLine( memberName, sourceLineNumber, writer );
+                writer.WriteLine( output );
+                writer.WriteLine( ex.ToString() );
             }
         }
     }

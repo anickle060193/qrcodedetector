@@ -19,12 +19,16 @@ namespace QrCodeDetector
     public class ImageHolder
     {
         private static readonly int EDGE_DETECTION_THRESHOLD = 40;
+        private static readonly int MINIMUM_BLOB_SIZE = 50;
+
         private static readonly Dictionary<DecodeHintType, Object> HINTS = new Dictionary<DecodeHintType, object>();
         static ImageHolder()
         {
             HINTS.Add( DecodeHintType.TRY_HARDER, true );
             HINTS.Add( DecodeHintType.POSSIBLE_FORMATS, BarcodeFormat.QR_CODE );
         }
+        private static readonly DifferenceEdgeDetector EDGE_DETECTOR = new DifferenceEdgeDetector();
+        private static readonly SimpleShapeChecker SHAPE_CHECKER = new SimpleShapeChecker();
 
         public String FullFilename { get; private set; }
 
@@ -67,7 +71,7 @@ namespace QrCodeDetector
         {
             if( File.Exists( FullFilename ) )
             {
-                using( Stream input = File.OpenRead(FullFilename ) )
+                using( Stream input = File.OpenRead( FullFilename ) )
                 {
                     return new Bitmap( input );
                 }
@@ -101,7 +105,7 @@ namespace QrCodeDetector
             }
         }
 
-        public void RunEdgeDetection( int value )
+        public void RunEdgeDetection( int value, bool showEdgesImage, bool showQuadImages )
         {
             if( HasRunEdgeDetection )
             {
@@ -116,15 +120,19 @@ namespace QrCodeDetector
                     {
                         Grayscale.CommonAlgorithms.BT709.Apply( image, grayImage );
 
-                        DifferenceEdgeDetector edgeDetector = new DifferenceEdgeDetector();
-                        using( UnmanagedImage edgesImage = edgeDetector.Apply( grayImage ) )
+                        using( UnmanagedImage edgesImage = EDGE_DETECTOR.Apply( grayImage ) )
                         {
                             Threshold thresholdFilter = new Threshold( value );
                             thresholdFilter.ApplyInPlace( edgesImage );
 
+                            if( showEdgesImage )
+                            {
+                                new ImageForm( "Enhanced Edges Image", edgesImage.ToManagedImage( true ) ).Show();
+                            }
+
                             BlobCounter blobCounter = new BlobCounter();
-                            blobCounter.MinHeight = 10;
-                            blobCounter.MinHeight = 10;
+                            blobCounter.MinHeight = MINIMUM_BLOB_SIZE;
+                            blobCounter.MinWidth = MINIMUM_BLOB_SIZE;
                             blobCounter.FilterBlobs = true;
                             blobCounter.ObjectsOrder = ObjectsOrder.Size;
 
@@ -137,18 +145,20 @@ namespace QrCodeDetector
                                 List<IntPoint> edgePoints = blobCounter.GetBlobsEdgePoints( blob );
                                 List<IntPoint> corners = null;
 
-                                SimpleShapeChecker shapeChecker = new SimpleShapeChecker();
-
-                                if( shapeChecker.IsQuadrilateral( edgePoints, out corners ) )
+                                if( SHAPE_CHECKER.IsQuadrilateral( edgePoints, out corners ) )
                                 {
                                     List<IntPoint> leftEdgePoints, rightEdgePoints;
                                     blobCounter.GetBlobsLeftAndRightEdges( blob, out leftEdgePoints, out rightEdgePoints );
 
-                                    float diff = ImageManipulation.CalculateAvgEdgeBrightnessDiff( leftEdgePoints, rightEdgePoints, grayImage );
+                                    Corners.Add( corners );
 
-                                    if( diff > 20 )
+                                    if( showQuadImages )
                                     {
-                                        Corners.Add( corners );
+                                        QuadrilateralTransformation quadTransformation = new QuadrilateralTransformation( corners, 200, 200 );
+                                        using( UnmanagedImage quadImage = quadTransformation.Apply( image ) )
+                                        {
+                                            new ImageForm( "QuadImage", quadImage.ToManagedImage( true ) ).Show();
+                                        }
                                     }
                                 }
                             }
