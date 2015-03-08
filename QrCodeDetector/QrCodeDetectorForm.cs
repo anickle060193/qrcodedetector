@@ -158,7 +158,7 @@ namespace QrCodeDetector
             {
                 uxImageDisplay.Image.Dispose();
             }
-            uxImageDisplay.Image = holder.LoadImage();
+            uxImageDisplay.Image = holder.LoadBitmap();
             Log.Write( "Current image set: " + holder.FullFilename );
             if( uxAutoDetectOnView.Checked )
             {
@@ -250,12 +250,13 @@ namespace QrCodeDetector
 
         private void uxImageDisplay_MouseUp( object sender, MouseEventArgs e )
         {
-            if( _tracking )
+            if( e.Button == MouseButtons.Left
+             && _tracking )
             {
                 _tracking = false;
 
                 _currentPoint = new PointF( e.X, e.Y );
-                using( Bitmap image = _currentImageHolder.LoadImage() )
+                using( Bitmap image = _currentImageHolder.LoadBitmap() )
                 {
                     int x = (int)Utitlies.BoundTo( _start.X, 0, image.Width );
                     int y = (int)Utitlies.BoundTo( _start.Y, 0, image.Height );
@@ -381,7 +382,12 @@ namespace QrCodeDetector
             {
                 try
                 {
-                    _currentImageHolder.RunEdgeDetection( (int)uxValue.Value, uxShowEnchancedImage.Checked, uxShowQuadImages.Checked );
+                    ImageHolder.EdgeDetectionOptions options = new ImageHolder.EdgeDetectionOptions();
+                    options.Threshold = (int)uxThreshold.Value;
+                    options.MinimumBlobSize = (int)uxMinBlobSize.Value;
+                    options.ShowEdgesImage = uxShowEdgesImage.Checked;
+                    options.ShowBlobImages = uxShowBlobImages.Checked;
+                    _currentImageHolder.RunEdgeDetection( options );
                     Log.Write( "Edge detection ran on: " + _currentImageHolder.FullFilename );
                     uxImageDisplay.Invalidate();
                 }
@@ -391,11 +397,6 @@ namespace QrCodeDetector
                     Error( "An error occured while detecting edges.", ex );
                 }
             }
-        }
-
-        private void uxTimer_Tick( object sender, EventArgs e )
-        {
-            uxBytesUsed.Text = String.Format( "{0:n0}", GC.GetTotalMemory( false ) ) + " Bytes Used";
         }
 
         private void uxAutoAddImages_CheckedChanged( object sender, EventArgs e )
@@ -491,6 +492,14 @@ namespace QrCodeDetector
                 Settings.Default.AutoDetectOption = AutoDetectOptions.OnView;
             }
             Settings.Default.Save();
+        }
+
+        private void uxSharpen_Click( object sender, EventArgs e )
+        {
+            if( _currentImageHolder != null )
+            {
+                new ImageForm( "Sharpen", _currentImageHolder.Sharpen() ).Show();
+            }
         }
     }
 }

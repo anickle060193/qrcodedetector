@@ -29,6 +29,7 @@ namespace QrCodeDetector
         }
         private static readonly DifferenceEdgeDetector EDGE_DETECTOR = new DifferenceEdgeDetector();
         private static readonly SimpleShapeChecker SHAPE_CHECKER = new SimpleShapeChecker();
+        private static readonly Sharpen SHARPEN_FILTER = new Sharpen();
 
         public String FullFilename { get; private set; }
 
@@ -56,7 +57,7 @@ namespace QrCodeDetector
             Corners = new List<List<IntPoint>>();
             try
             {
-                using( Bitmap bitmap = LoadImage() )
+                using( Bitmap bitmap = LoadBitmap() )
                 {
 
                 }
@@ -67,7 +68,7 @@ namespace QrCodeDetector
             }
         }
 
-        public Bitmap LoadImage()
+        public Bitmap LoadBitmap()
         {
             if( File.Exists( FullFilename ) )
             {
@@ -88,7 +89,7 @@ namespace QrCodeDetector
             {
                 return;
             }
-            using( Bitmap bitmap = this.LoadImage() )
+            using( Bitmap bitmap = this.LoadBitmap() )
             {
                 LuminanceSource source = new BitmapLuminanceSource( bitmap );
                 Binarizer binarizer = new HybridBinarizer( source );
@@ -105,13 +106,21 @@ namespace QrCodeDetector
             }
         }
 
-        public void RunEdgeDetection( int value, bool showEdgesImage, bool showQuadImages )
+        public class EdgeDetectionOptions
+        {
+            public int Threshold { get; set; }
+            public int MinimumBlobSize { get; set; }
+            public bool ShowEdgesImage { get; set; }
+            public bool ShowBlobImages { get; set; }
+        }
+
+        public void RunEdgeDetection( EdgeDetectionOptions options )
         {
             if( HasRunEdgeDetection )
             {
                 return;
             }
-            using( Bitmap newBitmap = LoadImage() )
+            using( Bitmap newBitmap = LoadBitmap() )
             {
                 Rectangle rect = new Rectangle( 0, 0, newBitmap.Width, newBitmap.Height );
                 using( UnmanagedImage image = new UnmanagedImage( newBitmap.LockBits( rect, ImageLockMode.ReadWrite, newBitmap.PixelFormat ) ) )
@@ -122,10 +131,10 @@ namespace QrCodeDetector
 
                         using( UnmanagedImage edgesImage = EDGE_DETECTOR.Apply( grayImage ) )
                         {
-                            Threshold thresholdFilter = new Threshold( value );
+                            Threshold thresholdFilter = new Threshold( options.Threshold );
                             thresholdFilter.ApplyInPlace( edgesImage );
 
-                            if( showEdgesImage )
+                            if( options.ShowEdgesImage )
                             {
                                 new ImageForm( "Enhanced Edges Image", edgesImage.ToManagedImage( true ) ).Show();
                             }
@@ -152,7 +161,7 @@ namespace QrCodeDetector
 
                                     Corners.Add( corners );
 
-                                    if( showQuadImages )
+                                    if( options.ShowBlobImages )
                                     {
                                         QuadrilateralTransformation quadTransformation = new QuadrilateralTransformation( corners, 200, 200 );
                                         using( UnmanagedImage quadImage = quadTransformation.Apply( image ) )
@@ -165,6 +174,14 @@ namespace QrCodeDetector
                         }
                     }
                 }
+            }
+        }
+
+        public Bitmap Sharpen()
+        {
+            using( Bitmap bitmap = LoadBitmap() )
+            {
+                return SHARPEN_FILTER.Apply( bitmap );
             }
         }
     }
