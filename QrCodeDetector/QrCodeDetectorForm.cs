@@ -256,15 +256,19 @@ namespace QrCodeDetector
                 _tracking = false;
 
                 _currentPoint = new PointF( e.X, e.Y );
-                using( Bitmap image = _currentImageHolder.LoadBitmap() )
+                float selectionWidth = Math.Abs( _start.X - _currentPoint.X );
+                float selectionHeight = Math.Abs( _start.Y - _currentPoint.Y );
+                if( selectionWidth >= MIN_SUB_SIZE && selectionHeight >= MIN_SUB_SIZE )
                 {
-                    int x = (int)Utitlies.BoundTo( _start.X, 0, image.Width );
-                    int y = (int)Utitlies.BoundTo( _start.Y, 0, image.Height );
-                    int width = (int)Utitlies.BoundTo( Math.Abs( x - _currentPoint.X ), 0, image.Width - x );
-                    int height = (int)Utitlies.BoundTo( Math.Abs( y - _currentPoint.Y ), 0, image.Height - y );
-
-                    if( width >= MIN_SUB_SIZE && height >= MIN_SUB_SIZE )
+                    using( Bitmap image = _currentImageHolder.LoadBitmap() )
                     {
+                        System.Drawing.Point imageStartPoint = PointUtilities.ConvertToImagePoint( uxImageDisplay, _start.Floor() );
+                        System.Drawing.Point imageCurrentPoint = PointUtilities.ConvertToImagePoint( uxImageDisplay, _currentPoint.Floor() );
+                        int x = (int)Utitlies.BoundTo( imageStartPoint.X, 0, image.Width );
+                        int y = (int)Utitlies.BoundTo( imageStartPoint.Y, 0, image.Height );
+                        int width = (int)Utitlies.BoundTo( Math.Abs( x - imageCurrentPoint.X ), 0, image.Width - x );
+                        int height = (int)Utitlies.BoundTo( Math.Abs( y - imageCurrentPoint.Y ), 0, image.Height - y );
+
                         try
                         {
                             using( Bitmap bitmap = ImageUtilities.SubImage( image, new Rectangle( x, y, width, height ) ) )
@@ -282,14 +286,20 @@ namespace QrCodeDetector
                             Error( "The image could not be saved.", ex );
                         }
                     }
-                    else
+                }
+                else
+                {
+                    _clickPoints.Add( new IntPoint( e.X, e.Y ) );
+                    if( _clickPoints.Count == 4 )
                     {
-                        _clickPoints.Add( new IntPoint( e.X, e.Y ) );
-                        if( _clickPoints.Count == 4 )
+                        try
                         {
-                            try
+                            List<IntPoint> clickPoints = PointUtilities.ConvertToImagePoints( uxImageDisplay, _clickPoints.ToArray().ConvertToPoints() )
+                                                                       .ConvertToIntPoints()
+                                                                       .ToList();
+                            QuadrilateralTransformation transform = new QuadrilateralTransformation( clickPoints, 200, 200 );
+                            using( Bitmap image = _currentImageHolder.LoadBitmap() )
                             {
-                                QuadrilateralTransformation transform = new QuadrilateralTransformation( _clickPoints, 200, 200 );
                                 using( Bitmap quadImage = transform.Apply( image ) )
                                 {
                                     String newFilename = CreateSubImageFilename( _currentImageHolder.FullFilename );
@@ -299,15 +309,15 @@ namespace QrCodeDetector
                                     }
                                 }
                             }
-                            catch( Exception ex )
-                            {
-                                Log.Write( "The sub-image could not be saved: " + _currentImageHolder.FullFilename, ex );
-                                Error( "The image could not be saved.", ex );
-                            }
-                            _clickPoints.Clear();
                         }
-                        uxImageDisplay.Invalidate();
+                        catch( Exception ex )
+                        {
+                            Log.Write( "The sub-image could not be saved: " + _currentImageHolder.FullFilename, ex );
+                            Error( "The image could not be saved.", ex );
+                        }
+                        _clickPoints.Clear();
                     }
+                    uxImageDisplay.Invalidate();
                 }
             }
             uxImageDisplay.Invalidate();

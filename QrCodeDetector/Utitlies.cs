@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Security.AccessControl;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace QrCodeDetector
 {
-    public class Utitlies
+    public static class Utitlies
     {
         public static bool HasWritePermissionOnDir( string path )
         {
