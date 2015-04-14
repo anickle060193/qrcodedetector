@@ -508,7 +508,15 @@ namespace QrCodeDetector
         {
             if( _currentImageHolder != null )
             {
-                new ImageForm( "Sharpen", _currentImageHolder.Sharpen() ).Show();
+                ImageForm.ShowImageDialog( "Sharpen", _currentImageHolder.Sharpen() );
+            }
+        }
+
+        private void uxApplyThreshold_Click( object sender, EventArgs e )
+        {
+            if( _currentImageHolder != null )
+            {
+                _currentImageHolder.RunThreshold( (int)uxThreshold.Value, uxShowGrayScaleImage.Checked );
             }
         }
     }

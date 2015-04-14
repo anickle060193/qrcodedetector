@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AForge.Imaging;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -13,11 +14,50 @@ namespace QrCodeDetector
 {
     public partial class ImageForm : Form
     {
-        public ImageForm( string title, Bitmap image )
+        private static void ShowImage( String title, Bitmap image, bool modal )
+        {
+            ImageForm form = new ImageForm();
+            form.uxImage.Image = image;
+            form.Text = title;
+            if( modal )
+            {
+                form.ShowDialog();
+            }
+            else
+            {
+                form.Show();
+            }
+        }
+
+        public static void ShowImage( string title, Bitmap image )
+        {
+            ShowImage( title, image, false );
+        }
+
+        public static void ShowImageDialog( String title, Bitmap image )
+        {
+            ShowImage( title, image, true );
+        }
+
+        public static void ShowImage( String title, UnmanagedImage image )
+        {
+            using( Bitmap bitmap = image.ToManagedImage( true ) )
+            {
+                ShowImage( title, bitmap );
+            }
+        }
+
+        public static void ShowImageDialog( String title, UnmanagedImage image )
+        {
+            using( Bitmap bitmap = image.ToManagedImage( true ) )
+            {
+                ShowImageDialog( title, bitmap );
+            }
+        }
+
+        public ImageForm()
         {
             InitializeComponent();
-            this.Text = title;
-            uxImage.Image = image;
         }
 
         private void ImageForm_FormClosed( object sender, FormClosedEventArgs e )

@@ -31,11 +31,12 @@
             this.components = new System.ComponentModel.Container();
             this.uxImageDirectoryBrowser = new System.Windows.Forms.FolderBrowserDialog();
             this.uxFileSystemWatcher = new System.IO.FileSystemWatcher();
-            this.uxEnhance = new System.Windows.Forms.Button();
+            this.uxRunEdgeDetection = new System.Windows.Forms.Button();
             this.uxThreshold = new System.Windows.Forms.NumericUpDown();
             this.uxDataGrid = new System.Windows.Forms.DataGridView();
             this.QrCodeData = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.uxHorizontalSplitContainer = new System.Windows.Forms.SplitContainer();
+            this.uxImageDisplay = new System.Windows.Forms.PictureBox();
             this.uxControlsGroup = new System.Windows.Forms.GroupBox();
             this.uxEnhanceGroup = new System.Windows.Forms.GroupBox();
             this.uxSharpen = new System.Windows.Forms.Button();
@@ -63,9 +64,10 @@
             this.uxMenu = new System.Windows.Forms.MenuStrip();
             this.uxOptionsMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.uxEnhanceMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.uxApplyThreshold = new System.Windows.Forms.Button();
+            this.uxShowGrayScaleImage = new System.Windows.Forms.CheckBox();
             this.Filename = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.uxImageHolderBindingSource = new System.Windows.Forms.BindingSource(this.components);
-            this.uxImageDisplay = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.uxFileSystemWatcher)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.uxThreshold)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.uxDataGrid)).BeginInit();
@@ -73,6 +75,7 @@
             this.uxHorizontalSplitContainer.Panel1.SuspendLayout();
             this.uxHorizontalSplitContainer.Panel2.SuspendLayout();
             this.uxHorizontalSplitContainer.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.uxImageDisplay)).BeginInit();
             this.uxControlsGroup.SuspendLayout();
             this.uxEnhanceGroup.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.uxMinBlobSize)).BeginInit();
@@ -81,7 +84,6 @@
             this.uxOutput.SuspendLayout();
             this.uxMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.uxImageHolderBindingSource)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.uxImageDisplay)).BeginInit();
             this.SuspendLayout();
             // 
             // uxFileSystemWatcher
@@ -90,15 +92,15 @@
             this.uxFileSystemWatcher.IncludeSubdirectories = true;
             this.uxFileSystemWatcher.SynchronizingObject = this;
             // 
-            // uxEnhance
+            // uxRunEdgeDetection
             // 
-            this.uxEnhance.Location = new System.Drawing.Point(6, 117);
-            this.uxEnhance.Name = "uxEnhance";
-            this.uxEnhance.Size = new System.Drawing.Size(206, 23);
-            this.uxEnhance.TabIndex = 4;
-            this.uxEnhance.Text = "Enhance!";
-            this.uxEnhance.UseVisualStyleBackColor = true;
-            this.uxEnhance.Click += new System.EventHandler(this.uxEnhance_Click);
+            this.uxRunEdgeDetection.Location = new System.Drawing.Point(6, 117);
+            this.uxRunEdgeDetection.Name = "uxRunEdgeDetection";
+            this.uxRunEdgeDetection.Size = new System.Drawing.Size(206, 23);
+            this.uxRunEdgeDetection.TabIndex = 4;
+            this.uxRunEdgeDetection.Text = "Run Edge Detection";
+            this.uxRunEdgeDetection.UseVisualStyleBackColor = true;
+            this.uxRunEdgeDetection.Click += new System.EventHandler(this.uxEnhance_Click);
             // 
             // uxThreshold
             // 
@@ -108,8 +110,13 @@
             0,
             0});
             this.uxThreshold.Location = new System.Drawing.Point(99, 19);
+            this.uxThreshold.Maximum = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
             this.uxThreshold.Minimum = new decimal(new int[] {
-            100,
+            1000,
             0,
             0,
             -2147483648});
@@ -141,7 +148,7 @@
             this.uxDataGrid.Name = "uxDataGrid";
             this.uxDataGrid.ReadOnly = true;
             this.uxDataGrid.RowHeadersVisible = false;
-            this.uxDataGrid.Size = new System.Drawing.Size(574, 114);
+            this.uxDataGrid.Size = new System.Drawing.Size(574, 133);
             this.uxDataGrid.TabIndex = 0;
             this.uxDataGrid.CurrentCellChanged += new System.EventHandler(this.uxDataGrid_CurrentCellChanged);
             this.uxDataGrid.KeyUp += new System.Windows.Forms.KeyEventHandler(this.uxDataGrid_KeyUp);
@@ -171,9 +178,23 @@
             // 
             this.uxHorizontalSplitContainer.Panel2.AutoScroll = true;
             this.uxHorizontalSplitContainer.Panel2.Controls.Add(this.uxDataGrid);
-            this.uxHorizontalSplitContainer.Size = new System.Drawing.Size(574, 409);
-            this.uxHorizontalSplitContainer.SplitterDistance = 291;
+            this.uxHorizontalSplitContainer.Size = new System.Drawing.Size(574, 472);
+            this.uxHorizontalSplitContainer.SplitterDistance = 335;
             this.uxHorizontalSplitContainer.TabIndex = 8;
+            // 
+            // uxImageDisplay
+            // 
+            this.uxImageDisplay.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.uxImageDisplay.Location = new System.Drawing.Point(0, 0);
+            this.uxImageDisplay.Name = "uxImageDisplay";
+            this.uxImageDisplay.Size = new System.Drawing.Size(574, 335);
+            this.uxImageDisplay.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.uxImageDisplay.TabIndex = 1;
+            this.uxImageDisplay.TabStop = false;
+            this.uxImageDisplay.Paint += new System.Windows.Forms.PaintEventHandler(this.uxImageDisplay_Paint);
+            this.uxImageDisplay.MouseDown += new System.Windows.Forms.MouseEventHandler(this.uxImageDisplay_MouseDown);
+            this.uxImageDisplay.MouseMove += new System.Windows.Forms.MouseEventHandler(this.uxImageDisplay_MouseMove);
+            this.uxImageDisplay.MouseUp += new System.Windows.Forms.MouseEventHandler(this.uxImageDisplay_MouseUp);
             // 
             // uxControlsGroup
             // 
@@ -186,24 +207,26 @@
             this.uxControlsGroup.Controls.Add(this.uxSetImageWatchDirectory);
             this.uxControlsGroup.Location = new System.Drawing.Point(12, 96);
             this.uxControlsGroup.Name = "uxControlsGroup";
-            this.uxControlsGroup.Size = new System.Drawing.Size(230, 340);
+            this.uxControlsGroup.Size = new System.Drawing.Size(230, 403);
             this.uxControlsGroup.TabIndex = 9;
             this.uxControlsGroup.TabStop = false;
             this.uxControlsGroup.Text = "Controls";
             // 
             // uxEnhanceGroup
             // 
+            this.uxEnhanceGroup.Controls.Add(this.uxShowGrayScaleImage);
+            this.uxEnhanceGroup.Controls.Add(this.uxApplyThreshold);
             this.uxEnhanceGroup.Controls.Add(this.uxSharpen);
             this.uxEnhanceGroup.Controls.Add(this.uxThreshold);
             this.uxEnhanceGroup.Controls.Add(this.uxShowBlobImages);
             this.uxEnhanceGroup.Controls.Add(this.uxMinBlobSizeLabel);
             this.uxEnhanceGroup.Controls.Add(this.uxShowEdgesImage);
             this.uxEnhanceGroup.Controls.Add(this.uxThresholdLabel);
-            this.uxEnhanceGroup.Controls.Add(this.uxEnhance);
+            this.uxEnhanceGroup.Controls.Add(this.uxRunEdgeDetection);
             this.uxEnhanceGroup.Controls.Add(this.uxMinBlobSize);
             this.uxEnhanceGroup.Location = new System.Drawing.Point(6, 154);
             this.uxEnhanceGroup.Name = "uxEnhanceGroup";
-            this.uxEnhanceGroup.Size = new System.Drawing.Size(218, 180);
+            this.uxEnhanceGroup.Size = new System.Drawing.Size(218, 233);
             this.uxEnhanceGroup.TabIndex = 16;
             this.uxEnhanceGroup.TabStop = false;
             this.uxEnhanceGroup.Text = "Enhance";
@@ -374,7 +397,7 @@
             // 
             this.uxStatusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.uxStatusLabel});
-            this.uxStatusStrip.Location = new System.Drawing.Point(0, 439);
+            this.uxStatusStrip.Location = new System.Drawing.Point(0, 502);
             this.uxStatusStrip.Name = "uxStatusStrip";
             this.uxStatusStrip.ShowItemToolTips = true;
             this.uxStatusStrip.Size = new System.Drawing.Size(834, 22);
@@ -466,6 +489,26 @@
             this.uxEnhanceMenuItem.Text = "Enhance!";
             this.uxEnhanceMenuItem.Click += new System.EventHandler(this.uxEnhance_Click);
             // 
+            // uxApplyThreshold
+            // 
+            this.uxApplyThreshold.Location = new System.Drawing.Point(6, 198);
+            this.uxApplyThreshold.Name = "uxApplyThreshold";
+            this.uxApplyThreshold.Size = new System.Drawing.Size(206, 23);
+            this.uxApplyThreshold.TabIndex = 17;
+            this.uxApplyThreshold.Text = "Apply Threshold";
+            this.uxApplyThreshold.UseVisualStyleBackColor = true;
+            this.uxApplyThreshold.Click += new System.EventHandler(this.uxApplyThreshold_Click);
+            // 
+            // uxShowGrayScaleImage
+            // 
+            this.uxShowGrayScaleImage.AutoSize = true;
+            this.uxShowGrayScaleImage.Location = new System.Drawing.Point(6, 175);
+            this.uxShowGrayScaleImage.Name = "uxShowGrayScaleImage";
+            this.uxShowGrayScaleImage.Size = new System.Drawing.Size(140, 17);
+            this.uxShowGrayScaleImage.TabIndex = 18;
+            this.uxShowGrayScaleImage.Text = "Show Gray Scale Image";
+            this.uxShowGrayScaleImage.UseVisualStyleBackColor = true;
+            // 
             // Filename
             // 
             this.Filename.DataPropertyName = "Filename";
@@ -477,25 +520,11 @@
             // 
             this.uxImageHolderBindingSource.DataSource = typeof(QrCodeDetector.ImageHolder);
             // 
-            // uxImageDisplay
-            // 
-            this.uxImageDisplay.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.uxImageDisplay.Location = new System.Drawing.Point(0, 0);
-            this.uxImageDisplay.Name = "uxImageDisplay";
-            this.uxImageDisplay.Size = new System.Drawing.Size(574, 291);
-            this.uxImageDisplay.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.uxImageDisplay.TabIndex = 1;
-            this.uxImageDisplay.TabStop = false;
-            this.uxImageDisplay.Paint += new System.Windows.Forms.PaintEventHandler(this.uxImageDisplay_Paint);
-            this.uxImageDisplay.MouseDown += new System.Windows.Forms.MouseEventHandler(this.uxImageDisplay_MouseDown);
-            this.uxImageDisplay.MouseMove += new System.Windows.Forms.MouseEventHandler(this.uxImageDisplay_MouseMove);
-            this.uxImageDisplay.MouseUp += new System.Windows.Forms.MouseEventHandler(this.uxImageDisplay_MouseUp);
-            // 
             // QrCodeDetectorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(834, 461);
+            this.ClientSize = new System.Drawing.Size(834, 524);
             this.Controls.Add(this.uxOutput);
             this.Controls.Add(this.uxStatusStrip);
             this.Controls.Add(this.uxControlsGroup);
@@ -513,6 +542,7 @@
             this.uxHorizontalSplitContainer.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.uxHorizontalSplitContainer)).EndInit();
             this.uxHorizontalSplitContainer.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.uxImageDisplay)).EndInit();
             this.uxControlsGroup.ResumeLayout(false);
             this.uxControlsGroup.PerformLayout();
             this.uxEnhanceGroup.ResumeLayout(false);
@@ -527,7 +557,6 @@
             this.uxMenu.ResumeLayout(false);
             this.uxMenu.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.uxImageHolderBindingSource)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.uxImageDisplay)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -539,7 +568,7 @@
         private System.Windows.Forms.BindingSource uxImageHolderBindingSource;
         private System.IO.FileSystemWatcher uxFileSystemWatcher;
         private System.Windows.Forms.NumericUpDown uxThreshold;
-        private System.Windows.Forms.Button uxEnhance;
+        private System.Windows.Forms.Button uxRunEdgeDetection;
         private System.Windows.Forms.StatusStrip uxStatusStrip;
         private System.Windows.Forms.GroupBox uxControlsGroup;
         private System.Windows.Forms.SplitContainer uxHorizontalSplitContainer;
@@ -572,6 +601,8 @@
         private System.Windows.Forms.ToolStripMenuItem uxEnhanceMenuItem;
         private System.Windows.Forms.Button uxSharpen;
         private System.Windows.Forms.PictureBox uxImageDisplay;
+        private System.Windows.Forms.Button uxApplyThreshold;
+        private System.Windows.Forms.CheckBox uxShowGrayScaleImage;
     }
 }
 

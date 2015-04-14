@@ -114,6 +114,33 @@ namespace QrCodeDetector
             public bool ShowBlobImages { get; set; }
         }
 
+        public void RunThreshold( int threshold, bool showGrayScale )
+        {
+            using( Bitmap newBitmap = LoadBitmap() )
+            {
+                Rectangle rect = new Rectangle( 0, 0, newBitmap.Width, newBitmap.Height );
+                using( UnmanagedImage image = new UnmanagedImage( newBitmap.LockBits( rect, ImageLockMode.ReadWrite, newBitmap.PixelFormat ) ) )
+                {
+                    using( UnmanagedImage grayImage = UnmanagedImage.Create( image.Width, image.Height, PixelFormat.Format8bppIndexed ) )
+                    {
+                        Grayscale.CommonAlgorithms.BT709.Apply( image, grayImage );
+
+                        if( showGrayScale )
+                        {
+                            ImageForm.ShowImageDialog( "Gray scale", grayImage );
+                        }
+
+                        Threshold thresholdFilter = new Threshold( threshold );
+
+                        using( UnmanagedImage thresholdImage = thresholdFilter.Apply( grayImage ) )
+                        {
+                            ImageForm.ShowImageDialog( "Threshold", thresholdImage );
+                        }
+                    }
+                }
+            }
+        }
+
         public void RunEdgeDetection( EdgeDetectionOptions options )
         {
             if( HasRunEdgeDetection )
@@ -129,6 +156,8 @@ namespace QrCodeDetector
                     {
                         Grayscale.CommonAlgorithms.BT709.Apply( image, grayImage );
 
+                        Threshold threshold = new Threshold( options.Threshold );
+
                         using( UnmanagedImage edgesImage = EDGE_DETECTOR.Apply( grayImage ) )
                         {
                             Threshold thresholdFilter = new Threshold( options.Threshold );
@@ -136,7 +165,7 @@ namespace QrCodeDetector
 
                             if( options.ShowEdgesImage )
                             {
-                                new ImageForm( "Enhanced Edges Image", edgesImage.ToManagedImage( true ) ).Show();
+                                ImageForm.ShowImage( "Enhanced Edges Image", edgesImage );
                             }
 
                             BlobCounter blobCounter = new BlobCounter();
@@ -166,7 +195,7 @@ namespace QrCodeDetector
                                         QuadrilateralTransformation quadTransformation = new QuadrilateralTransformation( corners, 200, 200 );
                                         using( UnmanagedImage quadImage = quadTransformation.Apply( image ) )
                                         {
-                                            new ImageForm( "QuadImage", quadImage.ToManagedImage( true ) ).Show();
+                                            ImageForm.ShowImage( "Quad Image", quadImage );
                                         }
                                     }
                                 }

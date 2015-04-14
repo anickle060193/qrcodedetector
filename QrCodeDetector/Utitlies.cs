@@ -83,5 +83,19 @@ namespace QrCodeDetector
                 return value;
             }
         }
+
+        public static Rectangle GetBounds( Point p1, Point p2, int offset )
+        {
+            int x = Math.Min( p1.X, p2.X ) - offset;
+            int y = Math.Min( p1.Y, p2.Y ) - offset;
+            int width = Math.Abs( p1.X - p2.X ) + offset;
+            int height = Math.Abs( p1.Y - p2.Y ) + offset;
+            return new Rectangle( x, y, width, height );
+        }
+
+        public static Rectangle GetBounds( Point p1, Point p2 )
+        {
+            return GetBounds( p1, p2, 0 );
+        }
     }
 }

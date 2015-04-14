@@ -43,7 +43,7 @@
             this.uxImage.Location = new System.Drawing.Point(0, 0);
             this.uxImage.Name = "uxImage";
             this.uxImage.Size = new System.Drawing.Size(284, 205);
-            this.uxImage.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
+            this.uxImage.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.uxImage.TabIndex = 0;
             this.uxImage.TabStop = false;
             // 
